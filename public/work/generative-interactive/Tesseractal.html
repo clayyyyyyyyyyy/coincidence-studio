@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>Tesseractal</title>
+  <style>
+    html,body{ margin:0; padding:0; background:#000; height:100%; overflow:hidden; }
+    canvas{ display:block; }
+  </style>
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
+  <script>
+    // Tesseractal — desktop responsive, mobile preserves original look
+
+    let angle = 0;
+    let maxD = 120;     // hypercube half-extent in 4D
+    let lastTouchX, lastTouchY;
+    let touchMovedFlag = false;
+
+    // Projection constants for 4D→3D perspective
+    // scale = projA / (projB - w)
+    let projA = 120;
+    let projB = 200;
+
+    let mobileMode = false; // when true, use original constants on mobile
+
+    function isMobilePortrait() {
+      // Heuristic: narrow, taller-than-wide viewports behave like the original
+      return (windowWidth <= 520) && (windowHeight >= windowWidth);
+    }
+
+    function applyParamsForMode(){
+      if (mobileMode) {
+        // ORIGINAL mobile behavior (same geometry as your first version)
+        maxD  = 120;
+        projA = 120;
+        projB = 200;
+      } else {
+        // Desktop / large screens: scale up while keeping proportions tasteful
+        const s = Math.min(windowWidth, windowHeight);
+        maxD  = Math.max(60, Math.floor(s * 0.30)); // approx 30% of the short edge
+        projA = maxD * 1.0;
+        projB = Math.max(160, maxD * 1.7);          // keep a safe distance from singularity
+      }
+    }
+
+    function setup() {
+      mobileMode = isMobilePortrait();
+      createCanvas(windowWidth, windowHeight, WEBGL);
+      // Match device default on mobile; cap for perf on desktop
+      if (mobileMode) {
+        pixelDensity(window.devicePixelRatio || 1);
+      } else {
+        pixelDensity(Math.min(2, window.devicePixelRatio || 1));
+      }
+      colorMode(HSB, 255);
+      strokeCap(ROUND);
+      strokeJoin(ROUND);
+      applyParamsForMode();
+      lastTouchX = width / 2;
+      lastTouchY = height / 2;
+    }
+
+    function draw() {
+      background(0);
+
+      // Stroke width: exact original on mobile; responsive on desktop
+      if (mobileMode) {
+        strokeWeight(1);
+      } else {
+        const w = Math.min(width, height);
+        strokeWeight(constrain(w * 0.0018, 0.6, 2.0));
+      }
+
+      // Scene rotation
+      rotateX(angle * 0.25);
+      rotateY(angle * 0.5);
+      rotateZ(angle * 0.75);
+      noFill();
+
+      // Fractal tesseracts from center
+      drawFractalTesseract(0, 0, 0, maxD, 2);
+
+      angle += 0.01; // continuous animation
+    }
+
+    // Touch/mouse drag (same feel as original)
+    function touchMoved() {
+      const dx = mouseX - lastTouchX;
+      const dy = mouseY - lastTouchY;
+      angle += Math.sqrt(dx * dx + dy * dy) * 0.01;
+      lastTouchX = mouseX;
+      lastTouchY = mouseY;
+      touchMovedFlag = true;
+      return false;
+    }
+    function mouseDragged(){ return touchMoved(); }
+    function mousePressed(){ lastTouchX = mouseX; lastTouchY = mouseY; }
+    function touchEnded(){ touchMovedFlag = false; }
+
+    function drawFractalTesseract(x, y, z, d, depth) {
+      if (depth === 0) return;
+
+      // Draw edges where Hamming distance of vertex indices is 1
+      for (let i = 0; i < 16; i++) {
+        for (let j = i + 1; j < 16; j++) {
+          if (hammingDistance(i, j) === 1) {
+            const v1 = project4D(i, d, x, y, z);
+            const v2 = project4D(j, d, x, y, z);
+            const hue = (frameCount * 2 + (i * 16 + j * 8)) % 255;
+            stroke(hue, 255, 255, 200);
+            line(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z);
+          }
+        }
+      }
+
+      // Recurse to smaller tesseracts at each vertex
+      if (depth > 1) {
+        const newD = d / 3;
+        for (let i = 0; i < 16; i++) {
+          const v = project4D(i, d, x, y, z);
+          drawFractalTesseract(v.x, v.y, v.z, newD, depth - 1);
+        }
+      }
+    }
+
+    function project4D(index, d, offsetX, offsetY, offsetZ) {
+      // Vertex in 4D, then offset for recursion
+      let x = (index & 1) ? d + offsetX : -d + offsetX;
+      let y = (index & 2) ? d + offsetY : -d + offsetY;
+      let z = (index & 4) ? d + offsetZ : -d + offsetZ;
+      let w = (index & 8) ? d : -d; // 4th dimension
+
+      // 4D rotation (z–w plane)
+      const w0 = w;
+      w = w * Math.cos(angle) - z * Math.sin(angle);
+      z = z * Math.cos(angle) + w0 * Math.sin(angle);
+
+      // Perspective from 4D→3D
+      const scale = projA / (projB - w);
+      x *= scale; y *= scale; z *= scale;
+
+      return createVector(x, y, z);
+    }
+
+    function hammingDistance(x, y) {
+      let dist = 0, val = x ^ y;
+      while (val > 0) { dist++; val &= val - 1; }
+      return dist;
+    }
+
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
+      const newMode = isMobilePortrait();
+      if (newMode !== mobileMode) mobileMode = newMode;
+      applyParamsForMode();
+      lastTouchX = width / 2;
+      lastTouchY = height / 2;
+    }
+  </script>
+</body>
+</html>

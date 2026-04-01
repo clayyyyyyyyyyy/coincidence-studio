@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>Hive</title>
+  <style>
+    html,body{ margin:0; padding:0; background:#000; height:100%; overflow:hidden; }
+    canvas{ display:block; }
+  </style>
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
+  <script>
+    let t = 0; // time variable
+    let baseSpeed = 0.01;
+    let speedFactor = baseSpeed;
+    let hueShift = 0;
+    let phi = (1 + Math.sqrt(5)) / 2; // Golden ratio
+
+    function setup() {
+      createCanvas(windowWidth, windowHeight);
+      noFill();
+      colorMode(HSB, 360, 100, 100, 100);
+    }
+
+    function draw() {
+      background(0, 10); // glow trail
+      translate(width / 2, height / 2);
+
+      let hasInput = touches.length > 0 || (mouseIsPressed && mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height);
+
+      if (hasInput) {
+        let yPos = touches.length > 0 ? touches[0].y : mouseY;
+        let xPos = touches.length > 0 ? touches[0].x : mouseX;
+
+        let targetSpeed = map(yPos, height, 0, 0.002, 0.05, true);
+        let targetHueShift = map(xPos, 0, width, 0, 360, true);
+
+        speedFactor = lerp(speedFactor, targetSpeed, 0.05);
+        hueShift = lerp(hueShift, targetHueShift, 0.05);
+      } else {
+        speedFactor = lerp(speedFactor, baseSpeed, 0.05);
+        hueShift = lerp(hueShift, 0, 0.05);
+      }
+
+      recursivePattern(0, 0, width * 0.4, 4, 1);
+      t += speedFactor;
+    }
+
+    function recursivePattern(x, y, size, depth, layer) {
+      if (depth === 0) return;
+
+      push();
+      translate(x, y);
+
+      let displacement = sin(t + depth) * size;
+
+      beginShape();
+      for (let i = 0; i < 6; i++) {
+        let angle1 = TWO_PI / 6 * i;
+        let angle2 = TWO_PI / 6 * (i + 1);
+        let sx1 = cos(angle1) * (size + displacement);
+        let sy1 = sin(angle1) * (size + displacement);
+        let sx2 = cos(angle2) * (size + displacement);
+        let sy2 = sin(angle2) * (size + displacement);
+
+        // Divine hue logic: each layer evolves color at different harmonic offsets without affecting speed
+        let baseHue = (t * 40 + hueShift + layer * 60) % 360;
+        let hue1 = (baseHue + 120 * (i % 3)) % 360;
+        let hue2 = (baseHue + 120 * ((i + 1) % 3)) % 360;
+
+        stroke(hue1, 100, 100);
+        line(0, 0, sx1, sy1);
+        stroke(hue2, 100, 100);
+        line(sx1, sy1, sx2, sy2);
+      }
+      endShape(CLOSE);
+
+      let newSize = size * 0.5;
+      for (let i = 0; i < 6; i++) {
+        let angle = TWO_PI / 6 * i;
+        let newX = cos(angle) * size * 0.5;
+        let newY = sin(angle) * size * 0.5;
+        recursivePattern(newX, newY, newSize, depth - 1, layer + 1);
+      }
+
+      pop();
+    }
+
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
+    }
+  </script>
+</body>
+</html>

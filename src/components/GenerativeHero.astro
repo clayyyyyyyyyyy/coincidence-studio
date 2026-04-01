@@ -1,0 +1,79 @@
+---
+/**
+ * GenerativeHero — Container for a p5.js sketch.
+ *
+ * Usage:
+ *   <GenerativeHero sketch="/sketches/hero.js" height="400px" />
+ *
+ * Place your p5.js sketch file in public/sketches/.
+ * The sketch should use instance mode, e.g.:
+ *
+ *   export default function(p) {
+ *     p.setup = () => { p.createCanvas(p.windowWidth, 400); };
+ *     p.draw = () => { ... };
+ *   }
+ *
+ * If no sketch prop is provided, the container renders as an
+ * empty placeholder that can be styled or filled later.
+ */
+
+interface Props {
+  sketch?: string;
+  height?: string;
+}
+
+const { sketch, height = '400px' } = Astro.props;
+---
+
+<div class="generative-hero" style={`--hero-height: ${height}`} data-sketch={sketch}>
+  <canvas id="hero-canvas"></canvas>
+</div>
+
+{sketch && (
+  <script define:vars={{ sketch }}>
+    // Load p5.js from CDN and run the sketch in instance mode
+    async function initSketch() {
+      if (typeof window === 'undefined') return;
+
+      // Load p5.js if not already present
+      if (!window.p5) {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js';
+        script.onload = () => loadSketch();
+        document.head.appendChild(script);
+      } else {
+        loadSketch();
+      }
+    }
+
+    async function loadSketch() {
+      try {
+        const mod = await import(sketch);
+        const sketchFn = mod.default;
+        const container = document.querySelector('.generative-hero');
+        if (sketchFn && container) {
+          new p5(sketchFn, container);
+        }
+      } catch (e) {
+        console.warn('Generative hero sketch not loaded:', e);
+      }
+    }
+
+    initSketch();
+  </script>
+)}
+
+<style>
+  .generative-hero {
+    width: 100%;
+    height: var(--hero-height, 400px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .generative-hero canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+</style>

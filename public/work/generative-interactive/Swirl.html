@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>Swirl</title>
+  <style>
+    html,body{ margin:0; padding:0; background:#000; height:100%; overflow:hidden; }
+    canvas{ display:block; }
+  </style>
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
+  <script>
+    // === Iridescent quasi-membrane v4.1 — Topological Twist Only ===
+    // Smooth post-touch continuation; fills canvas; no velocity logic.
+
+    let sh;
+    let baseM = 8.0, baseN = 6.0;
+
+    // touch state → uniforms
+    let touchX = 0.5, touchY = 0.5; // normalized
+    let lastPX = null, lastPY = null;
+
+    // smooth touch influence
+    let targetTouch = 0.0;     // 0 or 1, set by events
+    let touchInfluence = 0.0;  // eased each frame
+
+    const VERT = `
+    precision mediump float;
+    uniform mat4 uProjectionMatrix;
+    uniform mat4 uModelViewMatrix;
+    attribute vec3 aPosition;
+    attribute vec2 aTexCoord;
+    varying vec2 vUv;
+    void main(){
+      vUv = aTexCoord;
+      gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aPosition, 1.0);
+    }
+    `;
+
+    const FRAG = `
+    precision mediump float;
+    varying vec2 vUv;
+
+    uniform vec2  u_res;
+    uniform float u_time;
+    uniform float u_baseM;
+    uniform float u_baseN;
+
+    // touch uniforms
+    uniform float u_touching;    // 0..1 (now smoothed)
+    uniform vec2  u_touch;       // 0..1
+
+    float smooth01(float x){ x = clamp(x,0.0,1.0); return x*x*(3.0-2.0*x); }
+    float mixf(float a,float b,float t){ return a*(1.0-t)+b*t; }
+
+    vec3 hsb2rgb(vec3 c){
+      vec3 p = abs(fract(vec3(c.x)+vec3(0.0,0.6666667,0.3333333))*6.0-3.0);
+      return c.z * mix(vec3(1.0), clamp(p-1.0,0.0,1.0), c.y);
+    }
+
+    float qtime(float t, float a, float b){ return t * (a + b*0.0017); }
+
+    void main(){
+      vec2 p = vUv*2.0 - 1.0;
+      p.x *= u_res.x / u_res.y;
+
+      vec2 tc = u_touch*2.0 - 1.0;
+      tc.x *= u_res.x / u_res.y;
+
+      float dTouch = length(p - tc);
+      float t = u_time;
+
+      // base polar
+      float r  = length(p);
+      float th0 = atan(p.y, p.x);
+
+      // ---------- Topological twist (4D-like rotation in the core) ----------
+      // Knobs:
+      //  TWIST_GAIN   : overall strength
+      //  TWIST_DECAY  : locality (higher → twist confined closer to center)
+      //  TWIST_R_FREQ : radial variation
+      //  TWIST_T_FREQ : temporal speed
+      const float TWIST_GAIN   = 2.5;
+      const float TWIST_DECAY  = 12.0;
+      const float TWIST_R_FREQ = 20.0;
+      const float TWIST_T_FREQ = 1.00;
+
+      float twist = TWIST_GAIN
+                  * exp(-TWIST_DECAY * r*r)
+                  * sin(TWIST_T_FREQ*qtime(t,0.53,2.3)
+                        + TWIST_R_FREQ*r
+                        + 0.6*sin(3.0*r + 0.5*t));
+
+      // angle field = natural angle + center-localized twist
+      float th = th0 + twist;
+
+      // touch-driven swirl (kept from your v4.1)
+      float swirl = 0.9 * u_touching * exp(-3.0 * dTouch*dTouch);
+      th += swirl * sin(6.0*th0 + 4.0*r + qtime(t,0.41,3.0));
+
+      // radial warp (no diameter change)
+      float rWarp = r
+        + 0.06 * sin(3.0*r + 0.7*qtime(t,0.33,2.0))
+        + 0.04 * cos(5.0*r + 0.5*qtime(t,0.29,5.0));
+
+      // palette breathing + touch-Y temperature
+      float baseHue = mod(200.0 + 90.0*(0.5 + 0.5*sin(t*0.63))
+                          + 120.0*u_touching*(u_touch.y*2.0 - 1.0), 360.0);
+
+      // 8 unrolled modes with FM/AM
+      float v=0.0, u=0.0;
+
+      { float m=max(0.0,u_baseM+0.0), k=3.14159*(u_baseN+0.00);
+        float om=0.31,ph=0.00,ps=0.73,w=0.96,fmK=2.7,fmW=0.37,fmA=0.16;
+        float A=k*rWarp+om*t+ph+fmA*sin(fmK*rWarp+fmW*t), B=m*th+ps;
+        v+=w*cos(A)*cos(B); u+=w*sin(A)*sin(B+0.8); }
+      { float m=max(0.0,u_baseM+1.0), k=3.14159*(u_baseN+0.45);
+        float om=0.37,ph=0.61,ps=1.17,w=0.88,fmK=3.3,fmW=0.29,fmA=0.14;
+        float A=k*rWarp+om*t+ph+fmA*sin(fmK*rWarp+fmW*t), B=m*th+ps;
+        v+=w*cos(A)*cos(B); u+=w*sin(A)*sin(B+0.8); }
+      { float m=max(0.0,u_baseM+2.0), k=3.14159*(u_baseN+0.90);
+        float om=0.41,ph=1.07,ps=1.89,w=1.02,fmK=4.1,fmW=0.41,fmA=0.18;
+        float A=k*rWarp+om*t+ph+fmA*sin(fmK*rWarp+fmW*t), B=m*th+ps;
+        v+=w*cos(A)*cos(B); u+=w*sin(A)*sin(B+0.8); }
+      { float m=max(0.0,u_baseM+2.0), k=3.14159*(u_baseN+1.35);
+        float om=0.29,ph=1.91,ps=2.41,w=0.86,fmK=3.7,fmW=0.52,fmA=0.15;
+        float A=k*rWarp+om*t+ph+fmA*sin(fmK*rWarp+fmW*t), B=m*th+ps;
+        v+=w*cos(A)*cos(B); u+=w*sin(A)*sin(B+0.8); }
+      { float m=max(0.0,u_baseM+3.0), k=3.14159*(u_baseN+1.80);
+        float om=0.47,ph=2.53,ps=3.02,w=0.92,fmK=5.0,fmW=0.34,fmA=0.17;
+        float A=k*rWarp+om*t+ph+fmA*sin(fmK*rWarp+fmW*t), B=m*th+ps;
+        v+=w*cos(A)*cos(B); u+=w*sin(A)*sin(B+0.8); }
+      { float m=max(0.0,u_baseM+3.0), k=3.14159*(u_baseN+2.25);
+        float om=0.34,ph=3.41,ps=3.61,w=0.84,fmK=4.4,fmW=0.59,fmA=0.16;
+        float A=k*rWarp+om*t+ph+fmA*sin(fmK*rWarp+fmW*t), B=m*th+ps;
+        v+=w*cos(A)*cos(B); u+=w*sin(A)*sin(B+0.8); }
+      { float m=max(0.0,u_baseM+4.0), k=3.14159*(u_baseN+2.70);
+        float om=0.52,ph=3.97,ps=4.18,w=0.80,fmK=5.7,fmW=0.45,fmA=0.19;
+        float A=k*rWarp+om*t+ph+fmA*sin(fmK*rWarp+fmW*t), B=m*th+ps;
+        v+=w*cos(A)*cos(B); u+=w*sin(A)*sin(B+0.8); }
+      { float m=max(0.0,u_baseM+4.0), k=3.14159*(u_baseN+3.15);
+        float om=0.39,ph=4.63,ps=4.79,w=0.82,fmK=6.2,fmW=0.38,fmA=0.15;
+        float A=k*rWarp+om*t+ph+fmA*sin(fmK*rWarp+fmW*t), B=m*th+ps;
+        v+=w*cos(A)*cos(B); u+=w*sin(A)*sin(B+0.8); }
+
+      float node = 1.0 - (1.0 / (1.0 + 55.0 * v*v));
+      float hue  = mod(baseHue + 140.0 * atan(u, v) / 3.14159265 + 360.0, 360.0);
+
+      float radialSoft = 2.0 - smooth01(pow(length(vUv*2.0-1.0), 1.25));
+      float halo = mixf(0.15, 1.0, radialSoft);
+
+      float sat = 0.58 + 0.30*node;
+      float bri = 0.12 + 0.82*node*halo;
+
+      vec3 rgb = hsb2rgb(vec3(hue/360.0, clamp(sat,0.0,1.0), clamp(bri,0.0,1.0)));
+      gl_FragColor = vec4(rgb, 1.0);
+    }
+    `;
+
+    function setup(){
+      pixelDensity(5);
+      createCanvas(windowWidth, windowHeight, WEBGL);
+      noStroke();
+      sh = createShader(VERT, FRAG);
+    }
+
+    function windowResized(){ resizeCanvas(windowWidth, windowHeight); }
+
+    function draw(){
+      // Smoothly ease towards target (prevents state jump on release)
+      touchInfluence = lerp(touchInfluence, targetTouch, 0.04);
+
+      shader(sh);
+      sh.setUniform('u_res', [width, height]);
+      sh.setUniform('u_time', millis()/1000.0);
+      sh.setUniform('u_baseM', baseM);
+      sh.setUniform('u_baseN', baseN);
+      sh.setUniform('u_touching', touchInfluence);
+      sh.setUniform('u_touch', [touchX, touchY]);
+
+      rect(-width/2, -height/2, width, height);
+    }
+
+    // --- Interaction (no velocity logic) ---
+    function applyDrag(dx, dy){
+      baseN = constrain(Math.round(baseN + dx * 0.02), 1, 32);
+      baseM = constrain(Math.round(baseM - dy * 0.02), 0, 32);
+    }
+
+    function mousePressed(){
+      targetTouch = 1.0;
+      lastPX = mouseX; lastPY = mouseY;
+      touchX = mouseX/width; touchY = mouseY/height;
+    }
+    function mouseReleased(){ targetTouch = 0.0; lastPX = lastPY = null; }
+    function mouseDragged(){
+      targetTouch = 1.0;
+      const nx = mouseX/width, ny = mouseY/height;
+      if(lastPX!=null){
+        const dx = mouseX - lastPX, dy = mouseY - lastPY;
+        applyDrag(dx, dy);
+      }
+      lastPX = mouseX; lastPY = mouseY;
+      touchX = nx; touchY = ny;
+    }
+
+    function touchStarted(){
+      targetTouch = 1.0;
+      if(touches.length){
+        lastPX = touches[0].x; lastPY = touches[0].y;
+        touchX = touches[0].x/width; touchY = touches[0].y/height;
+      }
+      return false;
+    }
+    function touchEnded(){ targetTouch = 0.0; lastPX = lastPY = null; return false; }
+    function touchMoved(){
+      if(!touches.length) return false;
+      targetTouch = 1.0;
+      const tx = touches[0].x, ty = touches[0].y;
+      const dx = tx - (lastPX ?? tx);
+      const dy = ty - (lastPY ?? ty);
+      applyDrag(dx, dy);
+      lastPX = tx; lastPY = ty;
+      touchX = tx/width; touchY = ty/height;
+      return false;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>Portiere</title>
+  <style>
+    html,body{ margin:0; padding:0; background:#000; height:100%; overflow:hidden; }
+    canvas{ display:block; }
+  </style>
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
+  <script>
+    let hexRadius = 8;
+    let t = 0;
+    let layers = 4;
+
+    function setup() {
+      createCanvas(windowWidth, windowHeight);
+      pixelDensity(3);
+      colorMode(HSB, 360, 100, 100, 100);
+      noStroke();
+      background(0);
+    }
+
+    function draw() {
+      background(0, 11);
+
+      let timeMod = 0.002 + map(mouseY, 0, height, 0.004, 0.009);
+      t += timeMod;
+
+      for (let i = 0; i < layers; i++) {
+        let phase = t * (1.2 + i * 0.1);
+        let r = hexRadius * (1 + 0.1 * sin(phase + i));
+        let offset = sin(phase * 1.5 + i) * r * 0.5;
+
+        drawHexGrid(r, offset, i * 80 + t * 50, 12 + i * 6);
+      }
+    }
+
+    function drawHexGrid(r, offset, hueShift, alpha) {
+      let dx = r * 3;
+      let dy = sqrt(3) * r;
+
+      for (let x = -r * 2; x < width + r * 2; x += dx) {
+        for (let y = -r * 2; y < height + r * 2; y += dy) {
+          let rowOffset = ((x / dx) % 2) * dy / 2;
+
+          let mx = map(mouseX, 0, width, -PI, PI);
+          let my = map(mouseY, 0, height, -PI, PI);
+          let distortion = 10 + 5 * sin(t + x * 0.01 + y * 0.01);
+
+          let finalX = x + offset + sin(y * 0.01 + t + mx) * distortion;
+          let finalY = y + rowOffset + cos(x * 0.01 - t + my) * distortion;
+
+          let hueVal = (
+            hueShift +
+            120 * sin(finalX * 0.015 + t * 0.7) +
+            120 * cos(finalY * 0.015 - t * 0.9) +
+            180 * sin(t + sin(finalX * 0.01 + finalY * 0.01))
+          ) % 360;
+
+          fill((hueVal + 360) % 360, 90, 100, alpha);
+          drawHex(finalX, finalY, r * (0.85 + 0.1 * sin(t * 3 + finalX * 0.02)));
+        }
+      }
+    }
+
+    function drawHex(x, y, r) {
+      beginShape();
+      for (let a = 0; a < TWO_PI; a += PI / 3) {
+        let sx = x + cos(a) * r;
+        let sy = y + sin(a) * r;
+        vertex(sx, sy);
+      }
+      endShape(CLOSE);
+    }
+
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
+    }
+  </script>
+</body>
+</html>

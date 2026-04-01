@@ -1,0 +1,237 @@
+---
+const currentPath = Astro.url.pathname;
+
+const items = [
+  { href: '/', label: 'Home', number: '1', color: '#FF3B30' },
+  { href: '/work', label: 'Work', number: '2', color: '#EF8633' },
+  { href: '/curation', label: 'Exhibitions', number: '3', color: '#F5B731' },
+  { href: '/writing', label: 'Writing', number: '4', color: '#44B44A' },
+  { href: '/contact', label: 'Contact', number: '5', color: '#9260A8' },
+];
+---
+
+<nav class="badge-nav" id="badge-nav" aria-label="Site navigation">
+  {items.map((item, i) => (
+    <div class="badge-item" style={`--i: ${i}`}>
+      <a
+        href={item.href}
+        class:list={['badge-link', { active: currentPath === item.href || (item.href !== '/' && currentPath.startsWith(item.href)) }]}
+        tabindex={i === 0 ? undefined : -1}
+      >
+        <span class="badge-label">{item.label}</span>
+      </a>
+      <button
+        class="badge-circle"
+        style={`--badge-color: ${item.color}`}
+        data-index={i}
+        aria-label={i === 0 ? 'Toggle menu' : item.label}
+      >
+        {item.number}
+      </button>
+    </div>
+  ))}
+</nav>
+
+<style>
+  .badge-nav {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    pointer-events: none;
+  }
+
+  .badge-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    pointer-events: auto;
+  }
+
+  /* Circles 2–5: stacked behind circle 1 when closed */
+  .badge-item:nth-child(n+2) {
+    opacity: 0;
+    transform: translateY(calc(-1 * var(--i) * (24px + 10px)));
+    pointer-events: none;
+    transition:
+      transform 0.3s cubic-bezier(0.6, 0, 0.4, 1),
+      opacity 0.15s ease;
+    /* When closing: delay circles slightly so labels hide first */
+    transition-delay: 0.12s;
+  }
+
+  /* When open: circles drop to natural position */
+  .badge-nav.open .badge-item:nth-child(n+2) {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    transition:
+      transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      opacity 0.2s ease;
+    transition-delay: calc(var(--i) * 50ms);
+  }
+
+  /* Badge circle — Apple notification style */
+  .badge-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--badge-color);
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+    position: relative;
+    z-index: 2;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .badge-circle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  .badge-circle:active {
+    transform: scale(0.95);
+  }
+
+  /* Badge labels — hidden by default */
+  .badge-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #1A1A1A;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateX(8px);
+    pointer-events: none;
+    transition:
+      opacity 0.15s ease,
+      transform 0.15s ease;
+    /* When closing: immediate */
+    transition-delay: 0s;
+  }
+
+  /* When open: labels slide in */
+  .badge-nav.open .badge-label {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease;
+    transition-delay: calc(0.2s + var(--i) * 40ms);
+  }
+
+  /* Link wrapper */
+  .badge-link {
+    border-bottom: none;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+  }
+
+  .badge-link:hover {
+    border-bottom: none;
+  }
+
+  .badge-link:hover .badge-label {
+    color: #6B6B6B;
+  }
+
+  /* Fullbleed (homepage) night-mode label color */
+  :global(body.fullbleed.night-mode) .badge-label {
+    color: #fff;
+    transition: opacity 0.25s ease, transform 0.25s ease, color 0.8s ease;
+  }
+
+  :global(body.fullbleed.night-mode) .badge-link:hover .badge-label {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  :global(body.fullbleed:not(.night-mode)) .badge-label {
+    transition: opacity 0.25s ease, transform 0.25s ease, color 0.8s ease;
+  }
+
+  /* On open, make links tabbable */
+  .badge-nav.open .badge-link {
+    tabindex: 0;
+  }
+
+  @media (max-width: 768px) {
+    .badge-nav {
+      top: 12px;
+      right: 12px;
+    }
+  }
+</style>
+
+<script>
+  const nav = document.getElementById('badge-nav');
+  if (!nav) throw new Error('badge-nav not found');
+
+  const triggerCircle = nav.querySelector('.badge-item:first-child .badge-circle') as HTMLButtonElement;
+  const allCircles = nav.querySelectorAll('.badge-circle');
+  const allLinks = nav.querySelectorAll('.badge-link');
+  let isOpen = false;
+
+  function toggle() {
+    isOpen = !isOpen;
+    nav.classList.toggle('open', isOpen);
+
+    // Update tabindex on links
+    allLinks.forEach((link, i) => {
+      (link as HTMLAnchorElement).tabIndex = isOpen ? 0 : (i === 0 ? 0 : -1);
+    });
+  }
+
+  // Circle 1 toggles menu; when open, circles 2–5 navigate
+  allCircles.forEach((circle, i) => {
+    circle.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (i === 0) {
+        toggle();
+      } else if (isOpen) {
+        // Navigate via the sibling link
+        const link = circle.closest('.badge-item')?.querySelector('.badge-link') as HTMLAnchorElement;
+        if (link) window.location.href = link.href;
+      }
+    });
+  });
+
+  // Close when clicking outside
+  document.addEventListener('click', (e) => {
+    if (isOpen && !nav.contains(e.target as Node)) {
+      toggle();
+    }
+  });
+
+  // Prevent mousedown/touchstart from reaching p5's canvas handlers
+  nav.addEventListener('mousedown', (e) => e.stopPropagation());
+  nav.addEventListener('touchstart', (e) => e.stopPropagation());
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen) {
+      toggle();
+      triggerCircle.focus();
+    }
+  });
+</script>

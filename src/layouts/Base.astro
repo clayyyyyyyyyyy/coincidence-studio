@@ -1,0 +1,40 @@
+---
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  fullbleed?: boolean;
+}
+
+const {
+  title = 'Clay Devlin',
+  description = 'Generative artist, creative technologist, and founder of Sanctum. Based in Brooklyn.',
+  fullbleed = false,
+} = Astro.props;
+
+const pageTitle = title === 'Clay Devlin' ? title : `${title} — Clay Devlin`;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{pageTitle}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  </head>
+  <body class:list={[{ fullbleed }]}>
+    <Nav />
+    <main class="main-content">
+      {fullbleed ? <slot /> : <div class="container"><slot /></div>}
+    </main>
+    <Footer />
+  </body>
+</html>

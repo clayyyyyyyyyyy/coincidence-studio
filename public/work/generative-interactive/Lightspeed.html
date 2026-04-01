@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <title>Lightspeed</title>
+  <style>
+    html,body{ margin:0; padding:0; background:#000; height:100%; overflow:hidden; }
+    canvas{ display:block; }
+  </style>
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.9.3/lib/p5.min.js"></script>
+  <script>
+    let angleX = 0;
+    let angleY = 0;
+    let angleZ = 0; // subtle extra axis
+
+    let noiseScale = 0.75;
+    let stepSize = 30;
+    let colorCycleSpeed = 10;
+
+    // --- ambient drift controls ---
+    let t = 0;
+    let baseSpeed = 0.0006;   // how fast the drift intent changes
+    let maxOmega = 0.0022;    // max angular velocity per axis
+    let ease = 0.08;          // smoothing toward target velocities
+
+    let omegaX = 0, omegaY = 0, omegaZ = 0;
+    let targetOmegaX = 0, targetOmegaY = 0, targetOmegaZ = 0;
+
+    // --- touch feels like original ---
+    let rotationSpeedX = 0.001; // same semantics as your original
+    let rotationSpeedY = 0.001;
+
+    function setup() {
+      createCanvas(windowWidth, windowHeight, WEBGL);
+      noiseDetail(4, 0.5);
+      colorMode(HSB, 360, 100, 100, 100);
+    }
+
+    function draw() {
+      background(0);
+
+      // Ambient, non-deterministic angular velocities (Perlin-noise wander)
+      t += baseSpeed;
+      targetOmegaX = map(noise(t + 10.123), 0, 1, -maxOmega, maxOmega);
+      targetOmegaY = map(noise(t + 27.874), 0, 1, -maxOmega, maxOmega);
+      targetOmegaZ = map(noise(t + 53.401), 0, 1, -maxOmega, maxOmega);
+
+      omegaX = lerp(omegaX, targetOmegaX, ease);
+      omegaY = lerp(omegaY, targetOmegaY, ease);
+      omegaZ = lerp(omegaZ, targetOmegaZ, ease);
+
+      // Integrate angles (ambient drift)
+      angleX += omegaX;
+      angleY += omegaY;
+      angleZ += omegaZ * 0.35; // keep Z subtle
+
+      // Transform & light
+      rotateX(angleX);
+      rotateY(angleY);
+      rotateZ(angleZ);
+      pointLight(250, 250, 250, 250, 250, 250);
+
+      // Points field
+      for (let x = -width / 2; x < width / 2; x += stepSize) {
+        for (let y = -height / 2; y < height / 2; y += stepSize) {
+          for (let z = -height / 2; z < height / 2; z += stepSize) {
+            push();
+            translate(x, y, z);
+            let h = (frameCount * colorCycleSpeed + x + y + z) % 360;
+            stroke(h, 100, 100);
+            point(0, 0, 0);
+            pop();
+          }
+        }
+      }
+    }
+
+    // Touch/mouse drag: exactly like original feel (no inertia)
+    function touchMoved() {
+      angleX += (mouseY - pmouseY) * rotationSpeedX; // vertical drag -> pitch
+      angleY += (mouseX - pmouseX) * rotationSpeedY; // horizontal drag -> yaw
+      return false; // prevent scroll
+    }
+
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
+    }
+  </script>
+</body>
+</html>

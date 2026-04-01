@@ -1,0 +1,544 @@
+---
+import Base from '../layouts/Base.astro';
+
+const categories = [
+  { slug: 'generative-interactive', label: 'Creative Coding', preview: 'sketch' },
+  { slug: 'synthetic-video', label: 'Synthetic Video', preview: 'video', file: '/work/synthetic-video/ClayDevlin_SubwayDaydream_1x1.MP4' },
+  { slug: 'painting', label: 'Painting', preview: 'image', file: '/work/painting/Devlin_Clay_1.jpeg' },
+  { slug: 'mixed-media', label: 'Mixed Media', preview: 'image', file: '/work/mixed-media/IMG_8051.jpg' },
+  { slug: 'film-photography', label: 'Film Photography', preview: 'image', file: '/work/film-photography/bound.jpg' },
+  { slug: 'client-work', label: 'Client Work', preview: 'video', file: '/work/client-work/steps-instrumental.mp4' },
+];
+
+const sketches = [
+  'Beziorb', 'Circles', 'Eigenfield', 'Hearth', 'Hive', 'Hypertorus',
+  'Julia', 'Lightspeed', 'Portiere', 'Puddle', 'Swirl', 'Tesseractal',
+];
+---
+
+<Base title="Work" description="Generative art by Clay Devlin." fullbleed>
+  <div class="phone-wrapper">
+    <div class="phone-frame">
+      <!-- Dynamic Island -->
+      <div class="phone-notch"></div>
+      <!-- Screen -->
+      <div class="phone-screen">
+        <div class="screen-grid">
+          {categories.map((cat) => (
+            <div class="grid-item">
+              <div class="app-icon" data-category={cat.slug}>
+                {cat.preview === 'sketch' ? (
+                  <iframe
+                    id="icon-sketch"
+                    class="icon-iframe"
+                    loading="lazy"
+                    scrolling="no"
+                  ></iframe>
+                ) : cat.preview === 'video' ? (
+                  <video
+                    class="icon-media"
+                    src={cat.file}
+                    autoplay
+                    loop
+                    muted
+                    playsinline
+                  ></video>
+                ) : (
+                  <img
+                    class="icon-media"
+                    src={cat.file}
+                    alt={cat.label}
+                    loading="lazy"
+                  />
+                )}
+                <div class="icon-placeholder"></div>
+              </div>
+              <span class="icon-label">{cat.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen viewer overlay -->
+  <div class="viewer-overlay" id="viewer-overlay">
+    <iframe id="viewer-iframe" class="viewer-iframe" scrolling="no"></iframe>
+    <div class="viewer-title" id="viewer-title"></div>
+    <button class="viewer-arrow viewer-prev" id="viewer-prev" aria-label="Previous">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M15 5L8 12L15 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button class="viewer-arrow viewer-next" id="viewer-next" aria-label="Next">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M9 5L16 12L9 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <button class="viewer-close" id="viewer-close" aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+</Base>
+
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js"></script>
+<script is:inline src="/sketches/clouds.js"></script>
+
+<script is:inline>
+(function() {
+  var sketches = [
+    'Beziorb', 'Circles', 'Eigenfield', 'Hearth', 'Hive', 'Hypertorus',
+    'Julia', 'Lightspeed', 'Portiere', 'Puddle', 'Swirl', 'Tesseractal'
+  ];
+
+  var basePath = '/work/generative-interactive/';
+  var currentIndex = 0;
+
+  // Pick a random sketch for the icon preview
+  var randomIndex = Math.floor(Math.random() * sketches.length);
+  currentIndex = randomIndex;
+  var iconIframe = document.getElementById('icon-sketch');
+  if (iconIframe) {
+    iconIframe.src = basePath + sketches[randomIndex] + '.html';
+  }
+
+  // Viewer elements
+  var overlay = document.getElementById('viewer-overlay');
+  var viewerIframe = document.getElementById('viewer-iframe');
+  var viewerTitle = document.getElementById('viewer-title');
+  var prevBtn = document.getElementById('viewer-prev');
+  var nextBtn = document.getElementById('viewer-next');
+  var closeBtn = document.getElementById('viewer-close');
+
+  function openViewer(index) {
+    currentIndex = index;
+    viewerIframe.src = basePath + sketches[currentIndex] + '.html';
+    viewerTitle.textContent = sketches[currentIndex];
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeViewer() {
+    overlay.classList.remove('active');
+    // Clear iframe to stop sketch
+    setTimeout(function() {
+      if (!overlay.classList.contains('active')) {
+        viewerIframe.src = 'about:blank';
+      }
+    }, 400);
+    document.body.style.overflow = '';
+  }
+
+  function navigate(dir) {
+    currentIndex = (currentIndex + dir + sketches.length) % sketches.length;
+    viewerIframe.src = basePath + sketches[currentIndex] + '.html';
+    viewerTitle.textContent = sketches[currentIndex];
+  }
+
+  // Click on Creative Coding icon — use mousedown to beat p5's mousePressed
+  var ccIcon = document.querySelector('[data-category="generative-interactive"]');
+  if (ccIcon) {
+    ccIcon.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      // Set flag so clouds.js skips toggleNight
+      window._navClicked = true;
+      setTimeout(function() { window._navClicked = false; }, 100);
+      openViewer(currentIndex);
+    });
+    ccIcon.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      window._navClicked = true;
+      setTimeout(function() { window._navClicked = false; }, 100);
+      openViewer(currentIndex);
+    }, { passive: false });
+  }
+
+  // Viewer controls
+  prevBtn.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+  prevBtn.addEventListener('click', function(e) { e.stopPropagation(); navigate(-1); });
+  nextBtn.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+  nextBtn.addEventListener('click', function(e) { e.stopPropagation(); navigate(1); });
+  closeBtn.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+  closeBtn.addEventListener('click', function(e) { e.stopPropagation(); closeViewer(); });
+
+  // Click overlay background to close
+  overlay.addEventListener('mousedown', function(e) { e.stopPropagation(); });
+  overlay.addEventListener('touchstart', function(e) { e.stopPropagation(); });
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) closeViewer();
+  });
+
+  // Keyboard navigation
+  document.addEventListener('keydown', function(e) {
+    if (!overlay.classList.contains('active')) return;
+    if (e.key === 'Escape') closeViewer();
+    if (e.key === 'ArrowLeft') navigate(-1);
+    if (e.key === 'ArrowRight') navigate(1);
+  });
+
+  // Prevent icon iframe from capturing clicks
+  if (iconIframe) {
+    iconIframe.style.pointerEvents = 'none';
+  }
+})();
+</script>
+
+<style>
+  /* ================================
+     Fullbleed / clouds (same as home)
+     ================================ */
+  :global(body.fullbleed) {
+    --hero-text: #1A1A1A;
+    --hero-text-secondary: rgba(26, 26, 26, 0.75);
+    --hero-shadow: 0 0 0 transparent;
+    overflow: hidden;
+    background: transparent;
+    transition: color 0.8s ease;
+  }
+
+  :global(body.fullbleed.night-mode) {
+    --hero-text: #fff;
+    --hero-text-secondary: rgba(255, 255, 255, 0.82);
+    --hero-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  :global(body.fullbleed canvas) {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 0;
+  }
+
+  :global(body.fullbleed main) {
+    background: transparent;
+    padding: 0;
+  }
+
+  :global(body.fullbleed .site-footer) {
+    display: none;
+  }
+
+  /* ================================
+     Phone frame — CSS-only iPhone
+     ================================ */
+  .phone-wrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .phone-frame {
+    position: relative;
+    height: 95vh;
+    aspect-ratio: 393 / 852;
+    border-radius: clamp(32px, 6vh, 48px);
+    background: #1c1c1e;
+    box-shadow:
+      inset 0 0 0 1.5px rgba(255, 255, 255, 0.08),
+      0 0 0 1px rgba(0, 0, 0, 0.3),
+      0 20px 60px rgba(0, 0, 0, 0.3),
+      0 8px 20px rgba(0, 0, 0, 0.2);
+    padding: 6px;
+    pointer-events: auto;
+  }
+
+  /* Dynamic Island */
+  .phone-notch {
+    position: absolute;
+    top: 2.2%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28%;
+    height: 3.4%;
+    background: #000;
+    border-radius: 20px;
+    z-index: 20;
+  }
+
+  /* Screen area */
+  .phone-screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: calc(clamp(32px, 6vh, 48px) - 6px);
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ================================
+     App icon grid — 2 columns × 3 rows
+     ================================ */
+  .screen-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: clamp(6px, 1.2vh, 14px) clamp(10px, 2.5vw, 24px);
+    padding: 15% 8% 6% 8%;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-items: center;
+  }
+
+  .grid-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(4px, 0.8vh, 10px);
+  }
+
+  /* App icon — rounded square like iOS */
+  .app-icon {
+    position: relative;
+    width: clamp(64px, 14vh, 140px);
+    height: clamp(64px, 14vh, 140px);
+    border-radius: 22.37%; /* iOS icon radius */
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* Liquid glass fallback */
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(255, 255, 255, 0.15) 40%,
+      rgba(255, 255, 255, 0.22) 60%,
+      rgba(255, 255, 255, 0.1) 100%
+    );
+    backdrop-filter: blur(30px) saturate(1.6);
+    -webkit-backdrop-filter: blur(30px) saturate(1.6);
+    border: 0.5px solid rgba(255, 255, 255, 0.45);
+    box-shadow:
+      0 2px 12px rgba(0, 0, 0, 0.08),
+      0 1px 3px rgba(0, 0, 0, 0.06),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.5);
+  }
+
+  .app-icon:hover {
+    transform: scale(1.06);
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.12),
+      0 2px 6px rgba(0, 0, 0, 0.08),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.5);
+  }
+
+  .app-icon:active {
+    transform: scale(0.95);
+  }
+
+  /* Image/video media inside icon */
+  .icon-media {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+  }
+
+  .icon-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(200, 200, 200, 0.15) 100%
+    );
+  }
+
+  /* Live sketch iframe inside icon */
+  .icon-iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 400%;
+    height: 400%;
+    border: none;
+    transform: scale(0.25);
+    transform-origin: top left;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Label below each icon */
+  .icon-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+    font-size: clamp(8px, 1.4vh, 13px);
+    font-weight: 500;
+    color: var(--hero-text);
+    text-shadow: var(--hero-shadow);
+    text-align: center;
+    line-height: 1.2;
+    max-width: clamp(60px, 14vh, 130px);
+    transition: color 0.8s ease, text-shadow 0.8s ease;
+  }
+
+  /* ================================
+     Fullscreen viewer overlay
+     ================================ */
+  .viewer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.92);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+
+  .viewer-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .viewer-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .viewer-title {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 0.5rem 1.2rem;
+    border-radius: 10px;
+    border: 0.5px solid rgba(255, 255, 255, 0.12);
+    z-index: 10;
+    white-space: nowrap;
+  }
+
+  .viewer-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 0.5px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.75);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .viewer-arrow:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+
+  .viewer-prev { left: 20px; }
+  .viewer-next { right: 20px; }
+
+  .viewer-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 0.5px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.75);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .viewer-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+  }
+
+  /* ================================
+     Night mode adjustments
+     ================================ */
+  :global(body.night-mode) .phone-frame {
+    box-shadow:
+      inset 0 0 0 1.5px rgba(255, 255, 255, 0.06),
+      0 0 0 1px rgba(0, 0, 0, 0.5),
+      0 20px 60px rgba(0, 0, 0, 0.5),
+      0 8px 20px rgba(0, 0, 0, 0.35);
+  }
+
+  :global(body.night-mode) .app-icon {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.16) 0%,
+      rgba(255, 255, 255, 0.06) 40%,
+      rgba(255, 255, 255, 0.10) 60%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow:
+      0 2px 12px rgba(0, 0, 0, 0.25),
+      0 1px 3px rgba(0, 0, 0, 0.15),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.12);
+  }
+
+  :global(body.night-mode) .app-icon:hover {
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.35),
+      0 2px 6px rgba(0, 0, 0, 0.2),
+      inset 0 0.5px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  :global(body.night-mode) .icon-placeholder {
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+  }
+</style>
