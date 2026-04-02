@@ -1,0 +1,181 @@
+---
+import Base from '../../../layouts/Base.astro';
+
+export function getStaticPaths() {
+  const data = [
+    { slug: 'beziorb', file: 'Beziorb', title: 'Beziorb' },
+    { slug: 'circles', file: 'Circles', title: 'Circles' },
+    { slug: 'eigenfield', file: 'Eigenfield', title: 'Eigenfield' },
+    { slug: 'hearth', file: 'Hearth', title: 'Hearth' },
+    { slug: 'hive', file: 'Hive', title: 'Hive' },
+    { slug: 'hypertorus', file: 'Hypertorus', title: 'Hypertorus' },
+    { slug: 'julia', file: 'Julia', title: 'Julia' },
+    { slug: 'lightspeed', file: 'Lightspeed', title: 'Lightspeed' },
+    { slug: 'portiere', file: 'Portiere', title: 'Portiere' },
+    { slug: 'puddle', file: 'Puddle', title: 'Puddle' },
+    { slug: 'swirl', file: 'Swirl', title: 'Swirl' },
+    { slug: 'tesseractal', file: 'Tesseractal', title: 'Tesseractal' },
+  ];
+  return data.map((s) => ({ params: { slug: s.slug }, props: { sketches: data } }));
+}
+
+const { sketches } = Astro.props;
+
+const { slug } = Astro.params;
+const currentIndex = sketches.findIndex((s) => s.slug === slug);
+const current = sketches[currentIndex];
+const prev = sketches[(currentIndex - 1 + sketches.length) % sketches.length];
+const next = sketches[(currentIndex + 1) % sketches.length];
+---
+
+<Base title={current.title} description={`${current.title} — generative work by Clay Devlin.`} fullbleed>
+  <div class="viewer">
+    <iframe
+      src={`/work/generative-interactive/${current.file}.html`}
+      class="sketch-iframe"
+      scrolling="no"
+    ></iframe>
+
+    <div class="viewer-title">{current.title}</div>
+
+    <a class="viewer-arrow viewer-prev" href={`/work/generative/${prev.slug}`} aria-label="Previous">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M15 5L8 12L15 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+
+    <a class="viewer-arrow viewer-next" href={`/work/generative/${next.slug}`} aria-label="Next">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M9 5L16 12L9 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+
+    <a class="viewer-close" href="/work" aria-label="Back to Work">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+        <path d="M5 5L15 15M15 5L5 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </a>
+  </div>
+</Base>
+
+<script is:inline>
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowLeft') {
+      document.querySelector('.viewer-prev').click();
+    } else if (e.key === 'ArrowRight') {
+      document.querySelector('.viewer-next').click();
+    } else if (e.key === 'Escape') {
+      document.querySelector('.viewer-close').click();
+    }
+  });
+</script>
+
+<style>
+  :global(body.fullbleed) {
+    overflow: hidden;
+    background: #000;
+  }
+
+  :global(body.fullbleed main) {
+    padding: 0;
+  }
+
+  :global(body.fullbleed .site-footer) {
+    display: none;
+  }
+
+  .viewer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #000;
+  }
+
+  .sketch-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .viewer-title {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: 0.5rem 1.2rem;
+    border-radius: 10px;
+    border: 0.5px solid rgba(255, 255, 255, 0.12);
+    z-index: 10;
+    white-space: nowrap;
+  }
+
+  .viewer-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 0.5px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.75);
+    transition: background 0.2s ease, color 0.2s ease;
+    text-decoration: none;
+  }
+
+  .viewer-arrow:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border-bottom: none;
+  }
+
+  .viewer-prev { left: 20px; }
+  .viewer-next { right: 20px; }
+
+  .viewer-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 0.5px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.75);
+    transition: background 0.2s ease, color 0.2s ease;
+    text-decoration: none;
+  }
+
+  .viewer-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border-bottom: none;
+  }
+</style>
