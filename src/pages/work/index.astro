@@ -103,6 +103,8 @@ const categories = [
     viewerTitle.textContent = sketches[currentIndex];
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
+    // Pause cloud shader to free GPU for the sketch
+    if (window.pauseClouds) window.pauseClouds();
   }
 
   function closeViewer() {
@@ -113,6 +115,8 @@ const categories = [
       }
     }, 400);
     document.body.style.overflow = '';
+    // Resume cloud shader
+    if (window.resumeClouds) window.resumeClouds();
   }
 
   function navigate(dir) {
