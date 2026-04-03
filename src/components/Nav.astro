@@ -191,6 +191,11 @@ const items = [
   let isOpen = false;
   let justToggled = false;
 
+  // On generative piece pages, the "1" badge acts as a back button to /work
+  const isViewerPage = /^\/work\/generative\/.+/.test(window.location.pathname);
+  // On the work page, the "1" badge closes the viewer overlay when it's open
+  const isWorkPage = window.location.pathname === '/work' || window.location.pathname === '/work/';
+
   function toggle() {
     isOpen = !isOpen;
     nav.classList.toggle('open', isOpen);
@@ -206,19 +211,20 @@ const items = [
     });
   }
 
-  function handleCircle(i: number, e: Event) {
+  function handleBadgeOne(e: Event) {
     e.preventDefault();
     e.stopPropagation();
-
-    if (i === 0) {
+    if (isViewerPage) {
+      window.location.href = '/work';
+    } else if (isWorkPage && (window as any).isViewerOpen && (window as any).isViewerOpen()) {
+      (window as any).closeViewer();
+    } else {
       toggle();
-    } else if (isOpen) {
-      const link = circle.closest('.badge-item')?.querySelector('.badge-link') as HTMLAnchorElement;
-      if (link) window.location.href = link.href;
     }
   }
 
-  // Circle 1 toggles menu; when open, circles 2–5 navigate
+  // Circle 1 toggles menu (or navigates back on viewer pages);
+  // when open, circles 2–5 navigate
   allCircles.forEach((circle, i) => {
     // Use touchend for mobile so the menu responds immediately
     circle.addEventListener('touchend', (e) => {
@@ -226,7 +232,7 @@ const items = [
       e.stopPropagation();
 
       if (i === 0) {
-        toggle();
+        handleBadgeOne(e);
       } else if (isOpen) {
         const link = circle.closest('.badge-item')?.querySelector('.badge-link') as HTMLAnchorElement;
         if (link) window.location.href = link.href;
@@ -239,7 +245,7 @@ const items = [
       e.stopPropagation();
 
       if (i === 0) {
-        toggle();
+        handleBadgeOne(e);
       } else if (isOpen) {
         const link = circle.closest('.badge-item')?.querySelector('.badge-link') as HTMLAnchorElement;
         if (link) window.location.href = link.href;
