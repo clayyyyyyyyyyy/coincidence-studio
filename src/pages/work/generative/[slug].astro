@@ -68,6 +68,16 @@ const next = sketches[(currentIndex + 1) % sketches.length];
       document.querySelector('.viewer-close').click();
     }
   });
+
+  // On mobile, ensure taps on controls navigate immediately
+  // (iframe can steal touch events on some devices)
+  document.querySelectorAll('.viewer-arrow, .viewer-close').forEach(function(el) {
+    el.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      window.location.href = el.getAttribute('href');
+    }, { passive: false });
+  });
 </script>
 
 <style>
@@ -100,6 +110,7 @@ const next = sketches[(currentIndex + 1) % sketches.length];
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 1;
   }
 
   .viewer-title {
@@ -141,6 +152,8 @@ const next = sketches[(currentIndex + 1) % sketches.length];
     color: rgba(255, 255, 255, 0.75);
     transition: background 0.2s ease, color 0.2s ease;
     text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   .viewer-arrow:hover {
@@ -171,11 +184,29 @@ const next = sketches[(currentIndex + 1) % sketches.length];
     color: rgba(255, 255, 255, 0.75);
     transition: background 0.2s ease, color 0.2s ease;
     text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   .viewer-close:hover {
     background: rgba(255, 255, 255, 0.2);
     color: #fff;
     border-bottom: none;
+  }
+
+  /* Larger touch targets on mobile */
+  @media (max-width: 768px) {
+    .viewer-arrow {
+      width: 56px;
+      height: 56px;
+    }
+    .viewer-prev { left: 12px; }
+    .viewer-next { right: 12px; }
+    .viewer-close {
+      width: 48px;
+      height: 48px;
+      top: 16px;
+      right: 16px;
+    }
   }
 </style>

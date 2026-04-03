@@ -141,16 +141,22 @@ const categories = [
 
   prevBtn.addEventListener('mousedown', function(e) { e.stopPropagation(); });
   prevBtn.addEventListener('click', function(e) { e.stopPropagation(); navigate(-1); });
+  prevBtn.addEventListener('touchend', function(e) { e.preventDefault(); e.stopPropagation(); navigate(-1); }, { passive: false });
   nextBtn.addEventListener('mousedown', function(e) { e.stopPropagation(); });
   nextBtn.addEventListener('click', function(e) { e.stopPropagation(); navigate(1); });
+  nextBtn.addEventListener('touchend', function(e) { e.preventDefault(); e.stopPropagation(); navigate(1); }, { passive: false });
   closeBtn.addEventListener('mousedown', function(e) { e.stopPropagation(); });
   closeBtn.addEventListener('click', function(e) { e.stopPropagation(); closeViewer(); });
+  closeBtn.addEventListener('touchend', function(e) { e.preventDefault(); e.stopPropagation(); closeViewer(); }, { passive: false });
 
   overlay.addEventListener('mousedown', function(e) { e.stopPropagation(); });
-  overlay.addEventListener('touchstart', function(e) { e.stopPropagation(); });
+  overlay.addEventListener('touchstart', function(e) { e.stopPropagation(); }, { passive: true });
   overlay.addEventListener('click', function(e) {
     if (e.target === overlay) closeViewer();
   });
+  overlay.addEventListener('touchend', function(e) {
+    if (e.target === overlay) { e.preventDefault(); closeViewer(); }
+  }, { passive: false });
 
   document.addEventListener('keydown', function(e) {
     if (!overlay.classList.contains('active')) return;
@@ -305,6 +311,7 @@ const categories = [
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 1;
   }
 
   .viewer-title {
@@ -336,6 +343,8 @@ const categories = [
     cursor: pointer;
     color: rgba(255, 255, 255, 0.4);
     transition: color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   .viewer-arrow:hover {
@@ -360,10 +369,27 @@ const categories = [
     cursor: pointer;
     color: rgba(255, 255, 255, 0.4);
     transition: color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   .viewer-close:hover {
     color: rgba(255, 255, 255, 0.8);
+  }
+
+  @media (max-width: 768px) {
+    .viewer-arrow {
+      width: 56px;
+      height: 56px;
+    }
+    .viewer-prev { left: 12px; }
+    .viewer-next { right: 12px; }
+    .viewer-close {
+      width: 48px;
+      height: 48px;
+      top: 16px;
+      right: 16px;
+    }
   }
 
   @media (max-width: 600px) {
