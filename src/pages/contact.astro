@@ -3,65 +3,61 @@ import Base from '../layouts/Base.astro';
 ---
 
 <Base title="Contact" description="Get in touch with Clay Devlin." fullbleed>
-  <div class="construction">
-    <img src="/images/contact.jpeg" alt="Contact" />
-    <p class="construction-text">For inquiries, contact <a href="mailto:clay@sanctum.art">clay@sanctum.art</a></p>
+  <div class="contact">
+    <img src="https://media1.tenor.com/m/Jh2FUqhs6CAAAAAC/even-though-we%27re-miles-apart-a-computer-screen-connects-our-hearts-heart.gif" alt="A computer screen with a heart" />
+    <p class="contact-text">For inquiries, contact <a href="mailto:clay@sanctum.art">clay@sanctum.art</a></p>
   </div>
 </Base>
 
 <style>
-  .construction {
+  :global(body) {
+    background: #000 !important;
+    overflow: hidden;
+  }
+
+  :global(main) {
+    padding: 0 !important;
+    background: #000 !important;
+  }
+
+  :global(.site-footer) {
+    display: none;
+  }
+
+  .contact {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 2rem;
+    background: #000;
   }
 
-  .construction img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+  .contact img {
+    max-width: 320px;
+    width: 80%;
   }
 
-  .construction-text {
-    position: relative;
-    z-index: 1;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-    font-size: 1.1rem;
+  .contact-text {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
     color: #fff;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    padding: 0.8rem 1.6rem;
-    border-radius: 12px;
-    max-width: none;
+    letter-spacing: -0.01em;
   }
 
-  .construction-text a {
+  .contact-text a {
     color: #fff;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
   }
 
-  .construction-text a:hover {
+  .contact-text a:hover {
     border-color: #fff;
-  }
-
-  :global(body) {
-    overflow: hidden;
-  }
-
-  :global(main) {
-    padding: 0 !important;
-  }
-
-  :global(.site-footer) {
-    display: none;
   }
 </style>
