@@ -3,24 +3,14 @@ import Base from '../layouts/Base.astro';
 ---
 
 <Base title="Clay Devlin" fullbleed>
-  <div class="phone-wrapper">
-    <div class="phone-frame">
-      <!-- Dynamic Island -->
-      <div class="phone-notch"></div>
-      <!-- Screen -->
-      <div class="phone-screen">
-        <div class="screen-scroll" id="bio-text"></div>
-        <div class="screen-slider" id="slider-container">
-          <div class="slider-track" id="slider-track">
-            <div class="slider-fill" id="slider-fill"></div>
-            <div class="slider-handle" id="slider-handle">
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                <path d="M5 2.5L9.5 7L5 11.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
-            <span class="slider-label" id="slider-label">slide</span>
-          </div>
-        </div>
+  <div class="hero">
+    <div class="hero-content">
+      <h1>Clay Devlin</h1>
+      <div class="bio">
+        <p>Generative artist and creative technologist based in New York.</p>
+        <p>Born in Louisville, Kentucky, the youngest in a family of artists. Moved through film photography, mixed media, and painting before arriving at creative coding and computational systems as a primary way of working.</p>
+        <p>Creates ambient, abstract, evolving systems using p5.js and WebGL that unfold over time and respond to interaction. Most are developed on mobile and shaped by the conditions of everyday screen use.</p>
+        <p>Exhibited internationally, including at Beyond Basel in Miami, Primavera Digitale in Florence, and across New York. Founder of Sanctum.</p>
       </div>
     </div>
   </div>
@@ -29,174 +19,9 @@ import Base from '../layouts/Base.astro';
 <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js"></script>
 <script is:inline src="/sketches/clouds.js"></script>
 
-<script is:inline>
-(function() {
-  var bios = [
-    '<p>Hello world, my name is Clay Devlin. I\'m a generative artist and creative technologist based in New York.</p>',
-
-    '<p>Hello world, my name is Clay Devlin. I\'m a generative artist and creative technologist based in New York.</p><p>I was born in Louisville, Kentucky, the youngest in a family of artists.</p>',
-
-    '<p>Hello world, my name is Clay Devlin. I\'m a generative artist and creative technologist based in New York.</p><p>I was born in Louisville, Kentucky, the youngest in a family of artists. I moved through film photography, mixed media, and painting before arriving at creative coding and computational systems as a primary way of working.</p>',
-
-    '<p>Hello world, my name is Clay Devlin. I\'m a generative artist and creative technologist based in New York.</p><p>I was born in Louisville, Kentucky, the youngest in a family of artists. I moved through film photography, mixed media, and painting before arriving at creative coding and computational systems as a primary way of working.</p><p>In 2022, I co-founded Subjective NYC and led curation at LUME Studios in Tribeca. As more of my time shifted toward programming and exhibition-making, my own studio practice became constrained. I turned to creative coding as a way to keep creating.</p>',
-
-    '<p>Hello world, my name is Clay Devlin. I\'m a generative artist and creative technologist based in New York.</p><p>I was born in Louisville, Kentucky, the youngest in a family of artists. I moved through film photography, mixed media, and painting before arriving at creative coding and computational systems as a primary way of working.</p><p>In 2022, I co-founded Subjective NYC and led curation at LUME Studios in Tribeca. As more of my time shifted toward programming and exhibition-making, my own studio practice became constrained. I turned to creative coding as a way to keep creating. Around the same time, large language models became accessible, and I began using them as collaborators. Working through language to iteratively shape code opened a new process, where intuition and logic, taste and structure, could meet and something could be discovered rather than fully planned.</p>',
-
-    '<p>Hello world, my name is Clay Devlin. I\'m a generative artist and creative technologist based in New York.</p><p>I was born in Louisville, Kentucky, the youngest in a family of artists. I moved through film photography, mixed media, and painting before arriving at creative coding and computational systems as a primary way of working.</p><p>In 2022, I co-founded Subjective NYC and led curation at LUME Studios in Tribeca. As more of my time shifted toward programming and exhibition-making, my own studio practice became constrained. I turned to creative coding as a way to keep creating. Around the same time, large language models became accessible, and I began using them as collaborators. Working through language to iteratively shape code opened a new process, where intuition and logic, taste and structure, could meet and something could be discovered rather than fully planned.</p><p>Soon after, I discovered I could write p5.js on my phone. That changed everything. I could work anywhere, on the train, between moments, inside the same environments I was trying to understand. This quickly became a daily practice.</p>',
-
-    '<p>Hello world, my name is Clay Devlin. I\'m a generative artist and creative technologist based in New York.</p><p>I was born in Louisville, Kentucky, the youngest in a family of artists. I moved through film photography, mixed media, and painting before arriving at creative coding and computational systems as a primary way of working.</p><p>In 2022, I co-founded Subjective NYC and led curation at LUME Studios in Tribeca. As more of my time shifted toward programming and exhibition-making, my own studio practice became constrained. I turned to creative coding as a way to keep creating. Around the same time, large language models became accessible, and I began using them as collaborators. Working through language to iteratively shape code opened a new process, where intuition and logic, taste and structure, could meet and something could be discovered rather than fully planned.</p><p>Soon after, I discovered I could write p5.js on my phone. That changed everything. I could work anywhere, on the train, between moments, inside the same environments I was trying to understand. This quickly became a daily practice.</p><p>Over time, working this way began to shift how the screen felt to me. The experience of creating and interacting with these systems was slower, more continuous, and more absorbing than the fragmented rhythms I associated with social media. The work held my attention differently. I found myself returning to the screensavers I remembered from growing up. They introduced a quiet sense of wonder into the machine. They were ambient and self-evolving, turning the computer into a calmly fascinating presence.</p>',
-
-    '<p>Hello world, my name is Clay Devlin. I\'m a generative artist and creative technologist based in New York.</p><p>I was born in Louisville, Kentucky, the youngest in a family of artists. I moved through film photography, mixed media, and painting before arriving at creative coding and computational systems as a primary way of working.</p><p>In 2022, I co-founded Subjective NYC and led curation at LUME Studios in Tribeca. As more of my time shifted toward programming and exhibition-making, my own studio practice became constrained. I turned to creative coding as a way to keep creating. Around the same time, large language models became accessible, and I began using them as collaborators. Working through language to iteratively shape code opened a new process, where intuition and logic, taste and structure, could meet and something could be discovered rather than fully planned.</p><p>Soon after, I discovered I could write p5.js on my phone. That changed everything. I could work anywhere, on the train, between moments, inside the same environments I was trying to understand. This quickly became a daily practice.</p><p>Over time, working this way began to shift how the screen felt to me. The experience of creating and interacting with these systems was slower, more continuous, and more absorbing than the fragmented rhythms I associated with social media. The work held my attention differently. I found myself returning to the screensavers I remembered from growing up. They introduced a quiet sense of wonder into the machine. They were ambient and self-evolving, turning the computer into a calmly fascinating presence.</p><p>That memory led me to look more closely at the screensaver as both a technical artifact and a cultural form, and from there into research in neuroaesthetics and Attention Restoration Theory. I became interested in how digital environments shape perception, and in the possibility that computational systems could be used not to capture attention, but to hold it in a different way.</p>',
-
-    '<p>Hello world, my name is Clay Devlin. I\'m a generative artist and creative technologist based in New York.</p><p>I was born in Louisville, Kentucky, the youngest in a family of artists. I moved through film photography, mixed media, and painting before arriving at creative coding and computational systems as a primary way of working.</p><p>In 2022, I co-founded Subjective NYC and led curation at LUME Studios in Tribeca. As more of my time shifted toward programming and exhibition-making, my own studio practice became constrained. I turned to creative coding as a way to keep creating. Around the same time, large language models became accessible, and I began using them as collaborators. Working through language to iteratively shape code opened a new process, where intuition and logic, taste and structure, could meet and something could be discovered rather than fully planned.</p><p>Soon after, I discovered I could write p5.js on my phone. That changed everything. I could work anywhere, on the train, between moments, inside the same environments I was trying to understand. This quickly became a daily practice.</p><p>Over time, working this way began to shift how the screen felt to me. The experience of creating and interacting with these systems was slower, more continuous, and more absorbing than the fragmented rhythms I associated with social media. The work held my attention differently. I found myself returning to the screensavers I remembered from growing up. They introduced a quiet sense of wonder into the machine. They were ambient and self-evolving, turning the computer into a calmly fascinating presence.</p><p>That memory led me to look more closely at the screensaver as both a technical artifact and a cultural form, and from there into research in neuroaesthetics and Attention Restoration Theory. I became interested in how digital environments shape perception, and in the possibility that computational systems could be used not to capture attention, but to hold it in a different way.</p><p>My work now sits within that space. I create ambient, abstract, evolving systems using p5.js and WebGL that unfold over time and respond to interaction. Most are developed on mobile and shaped by the conditions of everyday screen use.</p><p>I am interested in whether these systems can support continuity, depth, and a quieter form of engagement, rather than intensifying stimulation or fragmentation.</p>',
-
-    '<p>Hello world, my name is Clay Devlin. I\'m a generative artist and creative technologist based in New York.</p><p>I was born in Louisville, Kentucky, the youngest in a family of artists. I moved through film photography, mixed media, and painting before arriving at creative coding and computational systems as a primary way of working.</p><p>In 2022, I co-founded Subjective NYC and led curation at LUME Studios in Tribeca. As more of my time shifted toward programming and exhibition-making, my own studio practice became constrained. I turned to creative coding as a way to keep creating. Around the same time, large language models became accessible, and I began using them as collaborators. Working through language to iteratively shape code opened a new process, where intuition and logic, taste and structure, could meet and something could be discovered rather than fully planned.</p><p>Soon after, I discovered I could write p5.js on my phone. That changed everything. I could work anywhere, on the train, between moments, inside the same environments I was trying to understand. This quickly became a daily practice.</p><p>Over time, working this way began to shift how the screen felt to me. The experience of creating and interacting with these systems was slower, more continuous, and more absorbing than the fragmented rhythms I associated with social media. The work held my attention differently. I found myself returning to the screensavers I remembered from growing up. They introduced a quiet sense of wonder into the machine. They were ambient and self-evolving, turning the computer into a calmly fascinating presence.</p><p>That memory led me to look more closely at the screensaver as both a technical artifact and a cultural form, and from there into research in neuroaesthetics and Attention Restoration Theory. I became interested in how digital environments shape perception, and in the possibility that computational systems could be used not to capture attention, but to hold it in a different way.</p><p>My work now sits within that space. I create ambient, abstract, evolving systems using p5.js and WebGL that unfold over time and respond to interaction. Most are developed on mobile and shaped by the conditions of everyday screen use.</p><p>I am interested in whether these systems can support continuity, depth, and a quieter form of engagement, rather than intensifying stimulation or fragmentation.</p><p>This line of thinking extends into Sanctum, an ongoing project that places this work at the threshold where attention is captured and asks whether algorithmic art can function as a perceptual counter-structure. It attempts to meet the conditions of digital life on their own terms while offering a different relationship to them.</p><p>My work has been exhibited internationally, including at Beyond Basel in Miami, Primavera Digitale in Florence, and across New York.</p>',
-
-    '<p>Hello world, my name is Clay Devlin. I\'m a generative artist and creative technologist based in New York.</p><p>I was born in Louisville, Kentucky, the youngest in a family of artists. I moved through film photography, mixed media, and painting before arriving at creative coding and computational systems as a primary way of working.</p><p>In 2022, I co-founded Subjective NYC and led curation at LUME Studios in Tribeca. As more of my time shifted toward programming and exhibition-making, my own studio practice became constrained. I turned to creative coding as a way to keep creating. Around the same time, large language models became accessible, and I began using them as collaborators. Working through language to iteratively shape code opened a new process, where intuition and logic, taste and structure, could meet and something could be discovered rather than fully planned.</p><p>Soon after, I discovered I could write p5.js on my phone. That changed everything. I could work anywhere, on the train, between moments, inside the same environments I was trying to understand. This quickly became a daily practice.</p><p>Over time, working this way began to shift how the screen felt to me. The experience of creating and interacting with these systems was slower, more continuous, and more absorbing than the fragmented rhythms I associated with social media. The work held my attention differently. I found myself returning to the screensavers I remembered from growing up. They introduced a quiet sense of wonder into the machine. They were ambient and self-evolving, turning the computer into a calmly fascinating presence.</p><p>That memory led me to look more closely at the screensaver as both a technical artifact and a cultural form, and from there into research in neuroaesthetics and Attention Restoration Theory. I became interested in how digital environments shape perception, and in the possibility that computational systems could be used not to capture attention, but to hold it in a different way.</p><p>My work now sits within that space. I create ambient, abstract, evolving systems using p5.js and WebGL that unfold over time and respond to interaction. Most are developed on mobile and shaped by the conditions of everyday screen use.</p><p>I am interested in whether these systems can support continuity, depth, and a quieter form of engagement, rather than intensifying stimulation or fragmentation.</p><p>This line of thinking extends into Sanctum, an ongoing project that places this work at the threshold where attention is captured and asks whether algorithmic art can function as a perceptual counter-structure. It attempts to meet the conditions of digital life on their own terms while offering a different relationship to them.</p><p>My work has been exhibited internationally, including at Beyond Basel in Miami, Primavera Digitale in Florence, and across New York.</p><p>At its core, my practice is about attention. How it is shaped, how it is directed, and what it could mean to reclaim sovereignty over this precious resource at the root of love, knowledge, truth, care, and consciousness itself.</p>'
-  ];
-
-  var bioEl = document.getElementById('bio-text');
-  var track = document.getElementById('slider-track');
-  var handle = document.getElementById('slider-handle');
-  var fill = document.getElementById('slider-fill');
-  var label = document.getElementById('slider-label');
-
-  var isDragging = false;
-  var progress = 0;
-  var currentBioIndex = 0;
-
-  // Parse a bio HTML string into an array of paragraph text strings
-  function parseBio(html) {
-    var temp = document.createElement('div');
-    temp.innerHTML = html;
-    return Array.from(temp.querySelectorAll('p')).map(function(p) { return p.textContent; });
-  }
-
-  // Set initial bio
-  bioEl.innerHTML = bios[0];
-
-  function updateBio(newIndex) {
-    var newParas = parseBio(bios[newIndex]);
-    var existingParas = Array.from(bioEl.querySelectorAll('p'));
-    var existingCount = existingParas.length;
-    var newCount = newParas.length;
-
-    // Update text of paragraphs that persist (handles content changes at early levels)
-    for (var i = 0; i < Math.min(existingCount, newCount); i++) {
-      if (existingParas[i].textContent !== newParas[i]) {
-        existingParas[i].textContent = newParas[i];
-      }
-    }
-
-    // Add new paragraphs (sliding right) — fade in
-    for (var j = existingCount; j < newCount; j++) {
-      var p = document.createElement('p');
-      p.textContent = newParas[j];
-      p.style.opacity = '0';
-      p.style.transform = 'translateY(6px)';
-      p.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
-      bioEl.appendChild(p);
-      // Force reflow, then animate in
-      p.offsetHeight;
-      p.style.opacity = '1';
-      p.style.transform = 'translateY(0)';
-    }
-
-    // Remove excess paragraphs (sliding left) — fade out then remove
-    for (var k = existingCount - 1; k >= newCount; k--) {
-      (function(el) {
-        el.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(4px)';
-        setTimeout(function() {
-          if (el.parentNode) el.parentNode.removeChild(el);
-        }, 260);
-      })(existingParas[k]);
-    }
-  }
-
-  function getTrackBounds() {
-    var trackRect = track.getBoundingClientRect();
-    var handleSize = handle.offsetWidth;
-    // Read the actual CSS-computed gap from the handle's left offset
-    var gap = handle.offsetLeft;
-    var maxTravel = trackRect.width - handleSize - (gap * 2);
-    return {
-      left: trackRect.left + gap + handleSize / 2,
-      maxTravel: maxTravel,
-      handleSize: handleSize,
-      gap: gap
-    };
-  }
-
-  function updateSlider(clientX) {
-    var bounds = getTrackBounds();
-    var raw = (clientX - bounds.left) / bounds.maxTravel;
-    progress = Math.max(0, Math.min(1, raw));
-
-    var px = progress * bounds.maxTravel;
-    handle.style.transform = 'translateX(' + px + 'px)';
-    fill.style.width = (px + bounds.handleSize + bounds.gap) + 'px';
-
-    label.style.opacity = Math.max(0, 1 - progress * 3);
-
-    var newIndex = Math.min(10, Math.floor(progress * 10 + 0.05));
-    if (newIndex !== currentBioIndex) {
-      currentBioIndex = newIndex;
-      updateBio(currentBioIndex);
-    }
-  }
-
-  handle.addEventListener('mousedown', function(e) {
-    e.preventDefault();
-    isDragging = true;
-    handle.classList.add('active');
-    document.body.style.userSelect = 'none';
-  });
-
-  window.addEventListener('mousemove', function(e) {
-    if (!isDragging) return;
-    updateSlider(e.clientX);
-  });
-
-  window.addEventListener('mouseup', function() {
-    if (!isDragging) return;
-    isDragging = false;
-    handle.classList.remove('active');
-    document.body.style.userSelect = '';
-  });
-
-  handle.addEventListener('touchstart', function(e) {
-    e.preventDefault();
-    isDragging = true;
-    handle.classList.add('active');
-  }, { passive: false });
-
-  window.addEventListener('touchmove', function(e) {
-    if (!isDragging) return;
-    e.preventDefault();
-    updateSlider(e.touches[0].clientX);
-  }, { passive: false });
-
-  window.addEventListener('touchend', function() {
-    if (!isDragging) return;
-    isDragging = false;
-    handle.classList.remove('active');
-  });
-
-  var sliderContainer = document.getElementById('slider-container');
-  sliderContainer.addEventListener('mousedown', function(e) { e.stopPropagation(); });
-  sliderContainer.addEventListener('touchstart', function(e) { e.stopPropagation(); });
-})();
-</script>
-
 <style>
-  /* ================================
-     Fullbleed / clouds
-     ================================ */
   :global(body.fullbleed) {
     --hero-text: #1A1A1A;
-    --hero-text-secondary: rgba(26, 26, 26, 0.75);
     --hero-shadow: 0 0 0 transparent;
     overflow: hidden;
     background: transparent;
@@ -205,7 +30,6 @@ import Base from '../layouts/Base.astro';
 
   :global(body.fullbleed.night-mode) {
     --hero-text: #fff;
-    --hero-text-secondary: rgba(255, 255, 255, 0.82);
     --hero-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
   }
 
@@ -227,10 +51,7 @@ import Base from '../layouts/Base.astro';
     display: none;
   }
 
-  /* ================================
-     Phone frame — CSS-only iPhone
-     ================================ */
-  .phone-wrapper {
+  .hero {
     position: fixed;
     top: 0;
     left: 0;
@@ -243,283 +64,41 @@ import Base from '../layouts/Base.astro';
     pointer-events: none;
   }
 
-  .phone-frame {
-    position: relative;
-    /* iPhone 15 Pro ratio: 393 × 852 = 1:2.168 — always 95% of viewport height */
-    height: 95vh;
-    aspect-ratio: 393 / 852;
-    border-radius: clamp(32px, 6vh, 48px);
-    background: #1c1c1e;
-    box-shadow:
-      inset 0 0 0 1.5px rgba(255, 255, 255, 0.08),
-      0 0 0 1px rgba(0, 0, 0, 0.3),
-      0 20px 60px rgba(0, 0, 0, 0.3),
-      0 8px 20px rgba(0, 0, 0, 0.2);
-    padding: 6px;
+  .hero-content {
+    max-width: 520px;
+    padding: 0 2rem;
     pointer-events: auto;
   }
 
-  /* Dynamic Island */
-  .phone-notch {
-    position: absolute;
-    top: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 84px;
-    height: 22px;
-    background: #000;
-    border-radius: 20px;
-    z-index: 20;
-  }
-
-  /* Screen area */
-  .phone-screen {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    border-radius: 38px;
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(1px);
-    -webkit-backdrop-filter: blur(1px);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* Scrollable text area */
-  .screen-scroll {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 12% 7% 16% 7%;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-
-    /* Fade at bottom where slider overlaps */
-    mask-image: linear-gradient(to bottom, black 0%, black calc(100% - 12%), transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, black 0%, black calc(100% - 12%), transparent 100%);
-  }
-
-  .screen-scroll::-webkit-scrollbar {
-    display: none;
-  }
-
-  .screen-scroll :global(p) {
+  h1 {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 400;
+    letter-spacing: -0.03em;
     color: var(--hero-text);
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-    /* Scale font with phone: 13.5px at 650px phone height ≈ 2.08% */
-    font-size: clamp(11px, 1.95vh, 16px);
-    line-height: 1.65;
-    max-width: none;
     text-shadow: var(--hero-shadow);
+    margin-bottom: 1.5rem;
     transition: color 0.8s ease, text-shadow 0.8s ease;
   }
 
-  .screen-scroll :global(p + p) {
-    margin-top: clamp(8px, 1.4vh, 16px);
-  }
-
-  /* ================================
-     Slider — pinned at bottom of screen
-     ================================ */
-  .screen-slider {
-    position: absolute;
-    bottom: 16px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(100% - 40px);
-    z-index: 10;
-  }
-
-  .slider-track {
-    position: relative;
-    /* Real iPhone slide-to-answer: ~62px at 393pt width ≈ 15.8% of phone width.
-       Phone width = 95vh / 2.168 ≈ 43.8vh. Track ≈ 43.8vh × 0.158 ≈ 6.9vh.
-       Clamp for sanity at small/large screens. */
-    --track-h: clamp(44px, 7.4vh, 70px);
-    --gap: calc(var(--track-h) * 0.07);
-    --handle-size: calc(var(--track-h) - var(--gap) * 2);
-    height: var(--track-h);
-    border-radius: 999px;
-    /* Liquid glass */
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.28) 0%,
-      rgba(255, 255, 255, 0.12) 40%,
-      rgba(255, 255, 255, 0.18) 60%,
-      rgba(255, 255, 255, 0.08) 100%
-    );
-    backdrop-filter: blur(40px) saturate(1.8) brightness(1.05);
-    -webkit-backdrop-filter: blur(40px) saturate(1.8) brightness(1.05);
-    border: 0.5px solid rgba(255, 255, 255, 0.45);
-    box-shadow:
-      inset 0 0.5px 0 rgba(255, 255, 255, 0.4),
-      inset 0 -0.5px 0 rgba(0, 0, 0, 0.04),
-      0 4px 16px rgba(0, 0, 0, 0.08),
-      0 1px 3px rgba(0, 0, 0, 0.06);
-    overflow: hidden;
-    cursor: default;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-
-  .slider-fill {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: var(--handle-size);
-    border-radius: 999px;
-    background: linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.1) 0%,
-      rgba(255, 255, 255, 0.04) 100%
-    );
-    pointer-events: none;
-  }
-
-  .slider-handle {
-    position: absolute;
-    top: var(--gap);
-    left: var(--gap);
-    width: var(--handle-size);
-    height: var(--handle-size);
-    border-radius: 50%;
-    /* Liquid glass handle */
-    background: linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.95) 0%,
-      rgba(255, 255, 255, 0.7) 100%
-    );
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 0.5px solid rgba(255, 255, 255, 0.7);
-    box-shadow:
-      0 2px 8px rgba(0, 0, 0, 0.1),
-      0 0.5px 2px rgba(0, 0, 0, 0.06),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6),
-      inset 0 -0.5px 0 rgba(0, 0, 0, 0.03);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: grab;
-    z-index: 2;
-    transition: box-shadow 0.15s ease, background 0.15s ease;
-    touch-action: none;
-    color: rgba(0, 0, 0, 0.3);
-  }
-
-  .slider-handle:hover {
-    background: linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 1) 0%,
-      rgba(255, 255, 255, 0.85) 100%
-    );
-    box-shadow:
-      0 3px 12px rgba(0, 0, 0, 0.14),
-      0 1px 3px rgba(0, 0, 0, 0.08),
-      inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  }
-
-  .slider-handle.active {
-    cursor: grabbing;
-    background: rgba(255, 255, 255, 1);
-    box-shadow:
-      0 4px 16px rgba(0, 0, 0, 0.16),
-      0 1px 4px rgba(0, 0, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.8);
-  }
-
-  .slider-label {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-    font-size: clamp(11px, 1.8vh, 16px);
+  .bio p {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: clamp(0.875rem, 1.8vw, 1.05rem);
     font-weight: 400;
-    letter-spacing: 0.3px;
-    color: rgba(0, 0, 0, 0.22);
-    pointer-events: none;
-    z-index: 1;
-    transition: opacity 0.2s ease, color 0.8s ease;
+    line-height: 1.7;
+    color: var(--hero-text);
+    text-shadow: var(--hero-shadow);
+    max-width: none;
+    transition: color 0.8s ease, text-shadow 0.8s ease;
   }
 
-  /* Night mode adjustments */
-  :global(body.night-mode) .slider-track {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.14) 0%,
-      rgba(255, 255, 255, 0.06) 40%,
-      rgba(255, 255, 255, 0.10) 60%,
-      rgba(255, 255, 255, 0.04) 100%
-    );
-    border-color: rgba(255, 255, 255, 0.18);
-    box-shadow:
-      inset 0 0.5px 0 rgba(255, 255, 255, 0.12),
-      inset 0 -0.5px 0 rgba(0, 0, 0, 0.15),
-      0 4px 16px rgba(0, 0, 0, 0.25);
+  .bio p + p {
+    margin-top: 1rem;
   }
 
-  :global(body.night-mode) .slider-handle {
-    background: linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.25) 0%,
-      rgba(255, 255, 255, 0.12) 100%
-    );
-    border-color: rgba(255, 255, 255, 0.22);
-    box-shadow:
-      0 2px 8px rgba(0, 0, 0, 0.3),
-      0 0.5px 2px rgba(0, 0, 0, 0.2),
-      inset 0 0.5px 0 rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.4);
-  }
-
-  :global(body.night-mode) .slider-handle:hover {
-    background: linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.32) 0%,
-      rgba(255, 255, 255, 0.18) 100%
-    );
-  }
-
-  :global(body.night-mode) .slider-handle.active {
-    background: rgba(255, 255, 255, 0.38);
-  }
-
-  :global(body.night-mode) .slider-label {
-    color: rgba(255, 255, 255, 0.18);
-  }
-
-  :global(body.night-mode) .slider-fill {
-    background: linear-gradient(90deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
-  }
-
-  :global(body.night-mode) .phone-frame {
-    box-shadow:
-      inset 0 0 0 1.5px rgba(255, 255, 255, 0.06),
-      0 0 0 1px rgba(0, 0, 0, 0.5),
-      0 20px 60px rgba(0, 0, 0, 0.5),
-      0 8px 20px rgba(0, 0, 0, 0.35);
-  }
-
-  /* Scale inner elements relative to phone */
-  .phone-notch {
-    width: 28%;
-    height: 3.4%;
-    top: 2.2%;
-  }
-
-  .phone-screen {
-    border-radius: calc(clamp(32px, 6vh, 48px) - 6px);
-  }
-
-  .screen-slider {
-    bottom: 2.6%;
-    width: calc(100% - 13%);
+  @media (max-width: 600px) {
+    .hero-content {
+      padding: 0 1.5rem;
+    }
   }
 </style>

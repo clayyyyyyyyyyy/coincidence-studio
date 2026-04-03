@@ -9,55 +9,42 @@ const categories = [
   { slug: 'film-photography', label: 'Film Photography', preview: 'image', file: '/work/film-photography/bound.jpg' },
   { slug: 'client-work', label: 'Client Work', preview: 'video', file: '/work/client-work/steps-instrumental_web.mp4' },
 ];
-
-const sketches = [
-  'Beziorb', 'Circles', 'Eigenfield', 'Hearth', 'Hive', 'Hypertorus',
-  'Julia', 'Lightspeed', 'Portiere', 'Puddle', 'Swirl', 'Tesseractal',
-];
 ---
 
-<Base title="Work" description="Generative art by Clay Devlin." fullbleed>
-  <div class="phone-wrapper">
-    <div class="phone-frame">
-      <!-- Dynamic Island -->
-      <div class="phone-notch"></div>
-      <!-- Screen -->
-      <div class="phone-screen">
-        <div class="screen-grid">
-          {categories.map((cat) => (
-            <div class="grid-item">
-              <div class="app-icon" data-category={cat.slug}>
-                {cat.preview === 'sketch' ? (
-                  <iframe
-                    id="icon-sketch"
-                    class="icon-iframe"
-                    loading="lazy"
-                    scrolling="no"
-                  ></iframe>
-                ) : cat.preview === 'video' ? (
-                  <video
-                    class="icon-media"
-                    src={cat.file}
-                    autoplay
-                    loop
-                    muted
-                    playsinline
-                  ></video>
-                ) : (
-                  <img
-                    class="icon-media"
-                    src={cat.file}
-                    alt={cat.label}
-                    loading="lazy"
-                  />
-                )}
-                <div class="icon-placeholder"></div>
-              </div>
-              <span class="icon-label">{cat.label}</span>
-            </div>
-          ))}
+<Base title="Work" description="Work by Clay Devlin." fullbleed>
+  <div class="work-page">
+    <div class="work-grid">
+      {categories.map((cat) => (
+        <div class="work-item" data-category={cat.slug}>
+          <div class="work-thumb">
+            {cat.preview === 'sketch' ? (
+              <iframe
+                id="icon-sketch"
+                class="thumb-iframe"
+                loading="lazy"
+                scrolling="no"
+              ></iframe>
+            ) : cat.preview === 'video' ? (
+              <video
+                class="thumb-media"
+                src={cat.file}
+                autoplay
+                loop
+                muted
+                playsinline
+              ></video>
+            ) : (
+              <img
+                class="thumb-media"
+                src={cat.file}
+                alt={cat.label}
+                loading="lazy"
+              />
+            )}
+          </div>
+          <span class="work-label">{cat.label}</span>
         </div>
-      </div>
+      ))}
     </div>
   </div>
 
@@ -96,7 +83,6 @@ const sketches = [
   var basePath = '/work/generative-interactive/';
   var currentIndex = 0;
 
-  // Pick a random sketch for the icon preview
   var randomIndex = Math.floor(Math.random() * sketches.length);
   currentIndex = randomIndex;
   var iconIframe = document.getElementById('icon-sketch');
@@ -104,7 +90,6 @@ const sketches = [
     iconIframe.src = basePath + sketches[randomIndex] + '.html';
   }
 
-  // Viewer elements
   var overlay = document.getElementById('viewer-overlay');
   var viewerIframe = document.getElementById('viewer-iframe');
   var viewerTitle = document.getElementById('viewer-title');
@@ -122,7 +107,6 @@ const sketches = [
 
   function closeViewer() {
     overlay.classList.remove('active');
-    // Clear iframe to stop sketch
     setTimeout(function() {
       if (!overlay.classList.contains('active')) {
         viewerIframe.src = 'about:blank';
@@ -137,13 +121,11 @@ const sketches = [
     viewerTitle.textContent = sketches[currentIndex];
   }
 
-  // Click on Creative Coding icon — use mousedown to beat p5's mousePressed
   var ccIcon = document.querySelector('[data-category="generative-interactive"]');
   if (ccIcon) {
     ccIcon.addEventListener('mousedown', function(e) {
       e.preventDefault();
       e.stopPropagation();
-      // Set flag so clouds.js skips toggleNight
       window._navClicked = true;
       setTimeout(function() { window._navClicked = false; }, 100);
       openViewer(currentIndex);
@@ -157,7 +139,6 @@ const sketches = [
     }, { passive: false });
   }
 
-  // Viewer controls
   prevBtn.addEventListener('mousedown', function(e) { e.stopPropagation(); });
   prevBtn.addEventListener('click', function(e) { e.stopPropagation(); navigate(-1); });
   nextBtn.addEventListener('mousedown', function(e) { e.stopPropagation(); });
@@ -165,14 +146,12 @@ const sketches = [
   closeBtn.addEventListener('mousedown', function(e) { e.stopPropagation(); });
   closeBtn.addEventListener('click', function(e) { e.stopPropagation(); closeViewer(); });
 
-  // Click overlay background to close
   overlay.addEventListener('mousedown', function(e) { e.stopPropagation(); });
   overlay.addEventListener('touchstart', function(e) { e.stopPropagation(); });
   overlay.addEventListener('click', function(e) {
     if (e.target === overlay) closeViewer();
   });
 
-  // Keyboard navigation
   document.addEventListener('keydown', function(e) {
     if (!overlay.classList.contains('active')) return;
     if (e.key === 'Escape') closeViewer();
@@ -180,7 +159,6 @@ const sketches = [
     if (e.key === 'ArrowRight') navigate(1);
   });
 
-  // Prevent icon iframe from capturing clicks
   if (iconIframe) {
     iconIframe.style.pointerEvents = 'none';
   }
@@ -188,12 +166,8 @@ const sketches = [
 </script>
 
 <style>
-  /* ================================
-     Fullbleed / clouds (same as home)
-     ================================ */
   :global(body.fullbleed) {
     --hero-text: #1A1A1A;
-    --hero-text-secondary: rgba(26, 26, 26, 0.75);
     --hero-shadow: 0 0 0 transparent;
     overflow: hidden;
     background: transparent;
@@ -202,7 +176,6 @@ const sketches = [
 
   :global(body.fullbleed.night-mode) {
     --hero-text: #fff;
-    --hero-text-secondary: rgba(255, 255, 255, 0.82);
     --hero-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
   }
 
@@ -224,10 +197,7 @@ const sketches = [
     display: none;
   }
 
-  /* ================================
-     Phone frame — CSS-only iPhone
-     ================================ */
-  .phone-wrapper {
+  .work-page {
     position: fixed;
     top: 0;
     left: 0;
@@ -237,139 +207,53 @@ const sketches = [
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: none;
   }
 
-  .phone-frame {
-    position: relative;
-    height: 95vh;
-    aspect-ratio: 393 / 852;
-    border-radius: clamp(32px, 6vh, 48px);
-    background: #1c1c1e;
-    box-shadow:
-      inset 0 0 0 1.5px rgba(255, 255, 255, 0.08),
-      0 0 0 1px rgba(0, 0, 0, 0.3),
-      0 20px 60px rgba(0, 0, 0, 0.3),
-      0 8px 20px rgba(0, 0, 0, 0.2);
-    padding: 6px;
-    pointer-events: auto;
-  }
-
-  /* Dynamic Island */
-  .phone-notch {
-    position: absolute;
-    top: 2.2%;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 28%;
-    height: 3.4%;
-    background: #000;
-    border-radius: 20px;
-    z-index: 20;
-  }
-
-  /* Screen area */
-  .phone-screen {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    border-radius: calc(clamp(32px, 6vh, 48px) - 6px);
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(1px);
-    -webkit-backdrop-filter: blur(1px);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* ================================
-     App icon grid — 2 columns × 3 rows
-     ================================ */
-  .screen-grid {
+  .work-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-    gap: clamp(6px, 1.2vh, 14px) clamp(10px, 2.5vw, 24px);
-    padding: 15% 8% 6% 8%;
-    width: 100%;
-    height: 100%;
-    align-items: center;
-    justify-items: center;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr 1fr;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    padding: 2rem;
+    max-width: 720px;
   }
 
-  .grid-item {
+  .work-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(4px, 0.8vh, 10px);
-  }
-
-  /* App icon — rounded square like iOS */
-  .app-icon {
-    position: relative;
-    width: clamp(64px, 14vh, 140px);
-    height: clamp(64px, 14vh, 140px);
-    border-radius: 22.37%; /* iOS icon radius */
-    overflow: hidden;
+    gap: 0.75rem;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    /* Liquid glass fallback */
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.4) 0%,
-      rgba(255, 255, 255, 0.15) 40%,
-      rgba(255, 255, 255, 0.22) 60%,
-      rgba(255, 255, 255, 0.1) 100%
-    );
-    backdrop-filter: blur(30px) saturate(1.6);
-    -webkit-backdrop-filter: blur(30px) saturate(1.6);
-    border: 0.5px solid rgba(255, 255, 255, 0.45);
-    box-shadow:
-      0 2px 12px rgba(0, 0, 0, 0.08),
-      0 1px 3px rgba(0, 0, 0, 0.06),
-      inset 0 0.5px 0 rgba(255, 255, 255, 0.5);
   }
 
-  .app-icon:hover {
-    transform: scale(1.06);
-    box-shadow:
-      0 4px 20px rgba(0, 0, 0, 0.12),
-      0 2px 6px rgba(0, 0, 0, 0.08),
-      inset 0 0.5px 0 rgba(255, 255, 255, 0.5);
+  .work-thumb {
+    position: relative;
+    width: clamp(100px, 18vw, 180px);
+    height: clamp(100px, 18vw, 180px);
+    border-radius: 22.37%;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+    background: rgba(255, 255, 255, 0.08);
   }
 
-  .app-icon:active {
-    transform: scale(0.95);
+  .work-item:hover .work-thumb {
+    transform: scale(1.04);
   }
 
-  /* Image/video media inside icon */
-  .icon-media {
+  .work-item:active .work-thumb {
+    transform: scale(0.97);
+  }
+
+  .thumb-media {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    z-index: 1;
   }
 
-  .icon-placeholder {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.3) 0%,
-      rgba(200, 200, 200, 0.15) 100%
-    );
-  }
-
-  /* Live sketch iframe inside icon */
-  .icon-iframe {
+  .thumb-iframe {
     position: absolute;
     top: 0;
     left: 0;
@@ -379,25 +263,20 @@ const sketches = [
     transform: scale(0.25);
     transform-origin: top left;
     pointer-events: none;
-    z-index: 1;
   }
 
-  /* Label below each icon */
-  .icon-label {
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-    font-size: clamp(8px, 1.4vh, 13px);
-    font-weight: 500;
+  .work-label {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: clamp(0.7rem, 1.4vw, 0.85rem);
+    font-weight: 400;
     color: var(--hero-text);
     text-shadow: var(--hero-shadow);
     text-align: center;
-    line-height: 1.2;
-    max-width: clamp(60px, 14vh, 130px);
+    letter-spacing: 0.01em;
     transition: color 0.8s ease, text-shadow 0.8s ease;
   }
 
-  /* ================================
-     Fullscreen viewer overlay
-     ================================ */
+  /* Viewer overlay */
   .viewer-overlay {
     position: fixed;
     top: 0;
@@ -433,19 +312,13 @@ const sketches = [
     bottom: 32px;
     left: 50%;
     transform: translateX(-50%);
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-    font-size: 1rem;
-    font-weight: 500;
-    letter-spacing: 0.3px;
-    color: rgba(255, 255, 255, 0.7);
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    padding: 0.5rem 1.2rem;
-    border-radius: 10px;
-    border: 0.5px solid rgba(255, 255, 255, 0.12);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.6);
     z-index: 10;
     white-space: nowrap;
+    letter-spacing: 0.02em;
   }
 
   .viewer-arrow {
@@ -453,24 +326,20 @@ const sketches = [
     top: 50%;
     transform: translateY(-50%);
     z-index: 10;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 0.5px solid rgba(255, 255, 255, 0.15);
-    border-radius: 50%;
+    background: none;
+    border: none;
     width: 48px;
     height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: rgba(255, 255, 255, 0.75);
-    transition: background 0.2s ease, color 0.2s ease;
+    color: rgba(255, 255, 255, 0.4);
+    transition: color 0.2s ease;
   }
 
   .viewer-arrow:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
+    color: rgba(255, 255, 255, 0.8);
   }
 
   .viewer-prev { left: 20px; }
@@ -481,64 +350,27 @@ const sketches = [
     top: 20px;
     right: 20px;
     z-index: 10;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 0.5px solid rgba(255, 255, 255, 0.15);
-    border-radius: 50%;
+    background: none;
+    border: none;
     width: 40px;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: rgba(255, 255, 255, 0.75);
-    transition: background 0.2s ease, color 0.2s ease;
+    color: rgba(255, 255, 255, 0.4);
+    transition: color 0.2s ease;
   }
 
   .viewer-close:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
+    color: rgba(255, 255, 255, 0.8);
   }
 
-  /* ================================
-     Night mode adjustments
-     ================================ */
-  :global(body.night-mode) .phone-frame {
-    box-shadow:
-      inset 0 0 0 1.5px rgba(255, 255, 255, 0.06),
-      0 0 0 1px rgba(0, 0, 0, 0.5),
-      0 20px 60px rgba(0, 0, 0, 0.5),
-      0 8px 20px rgba(0, 0, 0, 0.35);
-  }
-
-  :global(body.night-mode) .app-icon {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.16) 0%,
-      rgba(255, 255, 255, 0.06) 40%,
-      rgba(255, 255, 255, 0.10) 60%,
-      rgba(255, 255, 255, 0.04) 100%
-    );
-    border-color: rgba(255, 255, 255, 0.18);
-    box-shadow:
-      0 2px 12px rgba(0, 0, 0, 0.25),
-      0 1px 3px rgba(0, 0, 0, 0.15),
-      inset 0 0.5px 0 rgba(255, 255, 255, 0.12);
-  }
-
-  :global(body.night-mode) .app-icon:hover {
-    box-shadow:
-      0 4px 20px rgba(0, 0, 0, 0.35),
-      0 2px 6px rgba(0, 0, 0, 0.2),
-      inset 0 0.5px 0 rgba(255, 255, 255, 0.15);
-  }
-
-  :global(body.night-mode) .icon-placeholder {
-    background: linear-gradient(
-      145deg,
-      rgba(255, 255, 255, 0.08) 0%,
-      rgba(255, 255, 255, 0.03) 100%
-    );
+  @media (max-width: 600px) {
+    .work-grid {
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
   }
 </style>
