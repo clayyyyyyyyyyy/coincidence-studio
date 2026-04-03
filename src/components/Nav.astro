@@ -189,10 +189,16 @@ const items = [
   const allCircles = nav.querySelectorAll('.badge-circle');
   const allLinks = nav.querySelectorAll('.badge-link');
   let isOpen = false;
+  let justToggled = false;
 
   function toggle() {
     isOpen = !isOpen;
     nav.classList.toggle('open', isOpen);
+
+    // Brief flag to prevent the outside-click handler from
+    // immediately closing the menu on the same touch
+    justToggled = true;
+    setTimeout(() => { justToggled = false; }, 300);
 
     // Update tabindex on links
     allLinks.forEach((link, i) => {
@@ -200,8 +206,34 @@ const items = [
     });
   }
 
+  function handleCircle(i: number, e: Event) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (i === 0) {
+      toggle();
+    } else if (isOpen) {
+      const link = circle.closest('.badge-item')?.querySelector('.badge-link') as HTMLAnchorElement;
+      if (link) window.location.href = link.href;
+    }
+  }
+
   // Circle 1 toggles menu; when open, circles 2–5 navigate
   allCircles.forEach((circle, i) => {
+    // Use touchend for mobile so the menu responds immediately
+    circle.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (i === 0) {
+        toggle();
+      } else if (isOpen) {
+        const link = circle.closest('.badge-item')?.querySelector('.badge-link') as HTMLAnchorElement;
+        if (link) window.location.href = link.href;
+      }
+    });
+
+    // Keep click for desktop
     circle.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -209,23 +241,40 @@ const items = [
       if (i === 0) {
         toggle();
       } else if (isOpen) {
-        // Navigate via the sibling link
         const link = circle.closest('.badge-item')?.querySelector('.badge-link') as HTMLAnchorElement;
         if (link) window.location.href = link.href;
       }
     });
   });
 
-  // Close when clicking outside
+  // Also handle taps on the labels themselves on mobile
+  allLinks.forEach((link, i) => {
+    if (i === 0) return; // first link handled by circle
+    link.addEventListener('touchend', (e) => {
+      if (isOpen) {
+        // Let the link navigate naturally
+      } else {
+        e.preventDefault();
+      }
+      e.stopPropagation();
+    });
+  });
+
+  // Close when clicking/touching outside
   document.addEventListener('click', (e) => {
-    if (isOpen && !nav.contains(e.target as Node)) {
+    if (isOpen && !justToggled && !nav.contains(e.target as Node)) {
+      toggle();
+    }
+  });
+  document.addEventListener('touchend', (e) => {
+    if (isOpen && !justToggled && !nav.contains(e.target as Node)) {
       toggle();
     }
   });
 
   // Prevent mousedown/touchstart from reaching p5's canvas handlers
   nav.addEventListener('mousedown', (e) => e.stopPropagation());
-  nav.addEventListener('touchstart', (e) => e.stopPropagation());
+  nav.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
 
   // Close on Escape
   document.addEventListener('keydown', (e) => {
