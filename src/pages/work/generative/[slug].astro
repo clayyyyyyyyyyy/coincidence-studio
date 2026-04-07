@@ -36,8 +36,6 @@ const next = sketches[(currentIndex + 1) % sketches.length];
       scrolling="no"
     ></iframe>
 
-    <div class="viewer-title">{current.title}</div>
-
     <div class="viewer-controls">
       <a class="viewer-arrow viewer-prev" href={`/work/generative/${prev.slug}`} aria-label="Previous">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -107,26 +105,6 @@ const next = sketches[(currentIndex + 1) % sketches.length];
     top: 0;
     left: 0;
     z-index: 1;
-  }
-
-  .viewer-title {
-    position: absolute;
-    bottom: 32px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-    font-size: 1rem;
-    font-weight: 500;
-    letter-spacing: 0.3px;
-    color: rgba(255, 255, 255, 0.7);
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    padding: 0.5rem 1.2rem;
-    border-radius: 10px;
-    border: 0.5px solid rgba(255, 255, 255, 0.12);
-    z-index: 10;
-    white-space: nowrap;
   }
 
   .viewer-controls {

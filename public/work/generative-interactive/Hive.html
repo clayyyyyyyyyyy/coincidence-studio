@@ -44,7 +44,7 @@
         hueShift = lerp(hueShift, 0, 0.05);
       }
 
-      recursivePattern(0, 0, width * 0.4, 4, 1);
+      recursivePattern(0, 0, min(width, height) * 0.4, 4, 1);
       t += speedFactor;
     }
 
