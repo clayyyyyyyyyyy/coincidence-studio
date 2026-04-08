@@ -88,14 +88,12 @@ const categories = [
 
   var overlay = document.getElementById('viewer-overlay');
   var viewerIframe = document.getElementById('viewer-iframe');
-  var viewerTitle = document.getElementById('viewer-title');
   var prevBtn = document.getElementById('viewer-prev');
   var nextBtn = document.getElementById('viewer-next');
 
   function openViewer(index) {
     currentIndex = index;
     viewerIframe.src = basePath + sketches[currentIndex] + '.html';
-    viewerTitle.textContent = sketches[currentIndex];
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
     // Pause cloud shader to free GPU for the sketch
@@ -121,7 +119,6 @@ const categories = [
   function navigate(dir) {
     currentIndex = (currentIndex + dir + sketches.length) % sketches.length;
     viewerIframe.src = basePath + sketches[currentIndex] + '.html';
-    viewerTitle.textContent = sketches[currentIndex];
   }
 
   var ccIcon = document.querySelector('[data-category="generative-interactive"]');
