@@ -297,9 +297,7 @@ const TAP_MOVE_THRESHOLD = 16;
 const TAP_TIME_THRESHOLD = 280;
 
 function setup() {
-  // Use native density on desktop, cap at 1 on mobile to save GPU
-  var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  pixelDensity(isMobile ? 1 : 2);
+  pixelDensity(2);
   createCanvas(windowWidth, windowHeight, WEBGL);
   noStroke();
   cloudShader = createShader(vert, frag);
