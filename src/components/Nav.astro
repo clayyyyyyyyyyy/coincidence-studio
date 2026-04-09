@@ -2,11 +2,11 @@
 const currentPath = Astro.url.pathname;
 
 const items = [
-  { href: '/', label: 'Home', number: '1', color: '#FF3B30' },
-  { href: '/work', label: 'Work', number: '2', color: '#EF8633' },
-  { href: '/curation', label: 'Exhibitions', number: '3', color: '#F5B731' },
-  { href: '/writing', label: 'Writing', number: '4', color: '#44B44A' },
-  { href: '/contact', label: 'Contact', number: '5', color: '#9260A8' },
+  { href: '/', label: 'Home', planet: 'sun' },
+  { href: '/work', label: 'Work', planet: 'mercury' },
+  { href: '/curation', label: 'Exhibitions', planet: 'venus' },
+  { href: '/writing', label: 'Writing', planet: 'earth' },
+  { href: '/contact', label: 'Contact', planet: 'mars' },
 ];
 ---
 
@@ -22,11 +22,11 @@ const items = [
       </a>
       <button
         class="badge-circle"
-        style={`--badge-color: ${item.color}`}
         data-index={i}
+        data-planet={item.planet}
         aria-label={i === 0 ? 'Toggle menu' : item.label}
       >
-        {item.number}
+        <canvas class="planet-canvas" data-planet={item.planet}></canvas>
       </button>
     </div>
   ))}
@@ -52,19 +52,18 @@ const items = [
     pointer-events: auto;
   }
 
-  /* Circles 2–5: stacked behind circle 1 when closed */
+  /* Planets 2–5: stacked behind planet 1 when closed */
   .badge-item:nth-child(n+2) {
     opacity: 0;
-    transform: translateY(calc(-1 * var(--i) * (24px + 10px)));
+    transform: translateY(calc(-1 * var(--i) * (32px + 10px)));
     pointer-events: none;
     transition:
       transform 0.3s cubic-bezier(0.6, 0, 0.4, 1),
       opacity 0.15s ease;
-    /* When closing: delay circles slightly so labels hide first */
     transition-delay: 0.12s;
   }
 
-  /* When open: circles drop to natural position */
+  /* When open: planets drop to natural position */
   .badge-nav.open .badge-item:nth-child(n+2) {
     opacity: 1;
     transform: translateY(0);
@@ -75,20 +74,12 @@ const items = [
     transition-delay: calc(var(--i) * 50ms);
   }
 
-  /* Badge circle — Apple notification style */
+  /* Badge circle — planet container */
   .badge-circle {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: var(--badge-color);
-    color: #fff;
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    background: transparent;
     border: none;
     cursor: pointer;
     flex-shrink: 0;
@@ -96,18 +87,28 @@ const items = [
     position: relative;
     z-index: 2;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .badge-circle:hover {
-    transform: scale(1.1);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transform: scale(1.15);
   }
 
   .badge-circle:active {
     transform: scale(0.95);
+  }
+
+  .planet-canvas {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50%;
+    display: block;
+    pointer-events: none;
   }
 
   /* Badge labels — hidden by default */
@@ -123,7 +124,6 @@ const items = [
     transition:
       opacity 0.15s ease,
       transform 0.15s ease;
-    /* When closing: immediate */
     transition-delay: 0s;
   }
 
@@ -168,7 +168,6 @@ const items = [
     transition: opacity 0.25s ease, transform 0.25s ease, color 0.8s ease;
   }
 
-  /* On open, make links tabbable */
   .badge-nav.open .badge-link {
     tabindex: 0;
   }
@@ -182,6 +181,68 @@ const items = [
 </style>
 
 <script>
+  import * as THREE from 'three';
+
+  // --- Three.js Planet Rendering ---
+  const PLANET_SIZE = 32;
+
+  const planetConfigs = [
+    { name: 'sun', texture: '/textures/sun.jpg', emissive: true, speed: 0.003 },
+    { name: 'mercury', texture: '/textures/mercury.jpg', emissive: false, speed: 0.008 },
+    { name: 'venus', texture: '/textures/venus.jpg', emissive: false, speed: 0.006 },
+    { name: 'earth', texture: '/textures/earth.jpg', emissive: false, speed: 0.005 },
+    { name: 'mars', texture: '/textures/mars.jpg', emissive: false, speed: 0.007 },
+  ];
+
+  const textureLoader = new THREE.TextureLoader();
+
+  // Each planet gets its own tiny renderer targeting its canvas directly
+  const planetData = planetConfigs.map((p) => {
+    const canvas = document.querySelector(`.planet-canvas[data-planet="${p.name}"]`) as HTMLCanvasElement;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const renderSize = PLANET_SIZE * dpr;
+    canvas.width = renderSize;
+    canvas.height = renderSize;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    // Pass false to prevent Three.js from setting canvas.style (which breaks CSS layout)
+    renderer.setSize(renderSize, renderSize, false);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+    camera.position.z = 2.6;
+
+    const geometry = new THREE.SphereGeometry(1, 32, 32);
+    let material: THREE.Material;
+    if (p.emissive) {
+      material = new THREE.MeshBasicMaterial({ map: textureLoader.load(p.texture) });
+    } else {
+      material = new THREE.MeshStandardMaterial({ map: textureLoader.load(p.texture) });
+      const light = new THREE.DirectionalLight(0xffffff, 2.5);
+      light.position.set(3, 1, 4);
+      scene.add(light);
+      scene.add(new THREE.AmbientLight(0x404040, 1.0));
+    }
+
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.rotation.x = 0.15;
+    scene.add(mesh);
+
+    return { renderer, scene, camera, mesh, speed: p.speed };
+  });
+
+  function animate() {
+    requestAnimationFrame(animate);
+    planetData.forEach((pd) => {
+      pd.mesh.rotation.y += pd.speed;
+      pd.renderer.render(pd.scene, pd.camera);
+    });
+  }
+
+  animate();
+
+  // --- Navigation Logic ---
   const nav = document.getElementById('badge-nav');
   if (!nav) throw new Error('badge-nav not found');
 
@@ -191,21 +252,16 @@ const items = [
   let isOpen = false;
   let justToggled = false;
 
-  // On generative piece pages, the "1" badge acts as a back button to /work
   const isViewerPage = /^\/work\/generative\/.+/.test(window.location.pathname);
-  // On the work page, the "1" badge closes the viewer overlay when it's open
   const isWorkPage = window.location.pathname === '/work' || window.location.pathname === '/work/';
 
   function toggle() {
     isOpen = !isOpen;
     nav.classList.toggle('open', isOpen);
 
-    // Brief flag to prevent the outside-click handler from
-    // immediately closing the menu on the same touch
     justToggled = true;
     setTimeout(() => { justToggled = false; }, 300);
 
-    // Update tabindex on links
     allLinks.forEach((link, i) => {
       (link as HTMLAnchorElement).tabIndex = isOpen ? 0 : (i === 0 ? 0 : -1);
     });
@@ -223,10 +279,7 @@ const items = [
     }
   }
 
-  // Circle 1 toggles menu (or navigates back on viewer pages);
-  // when open, circles 2–5 navigate
   allCircles.forEach((circle, i) => {
-    // Use touchend for mobile so the menu responds immediately
     circle.addEventListener('touchend', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -239,7 +292,6 @@ const items = [
       }
     });
 
-    // Keep click for desktop
     circle.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -253,20 +305,14 @@ const items = [
     });
   });
 
-  // Also handle taps on the labels themselves on mobile
   allLinks.forEach((link, i) => {
-    if (i === 0) return; // first link handled by circle
+    if (i === 0) return;
     link.addEventListener('touchend', (e) => {
-      if (isOpen) {
-        // Let the link navigate naturally
-      } else {
-        e.preventDefault();
-      }
+      if (!isOpen) e.preventDefault();
       e.stopPropagation();
     });
   });
 
-  // Close when clicking/touching outside
   document.addEventListener('click', (e) => {
     if (isOpen && !justToggled && !nav.contains(e.target as Node)) {
       toggle();
@@ -278,11 +324,9 @@ const items = [
     }
   });
 
-  // Prevent mousedown/touchstart from reaching p5's canvas handlers
   nav.addEventListener('mousedown', (e) => e.stopPropagation());
   nav.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
 
-  // Close on Escape
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && isOpen) {
       toggle();
