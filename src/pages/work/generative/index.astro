@@ -1,0 +1,16 @@
+---
+import Base from '../../../layouts/Base.astro';
+---
+
+<Base title="Creative Coding" description="Generative work by Clay Devlin." fullbleed>
+  <div style="background:#000;position:fixed;top:0;left:0;right:0;bottom:0;"></div>
+</Base>
+
+<script is:inline>
+  var sketches = [
+    'beziorb', 'circles', 'eigenfield', 'hearth', 'hive', 'hypertorus',
+    'julia', 'lightspeed', 'portiere', 'puddle', 'swirl', 'tesseractal'
+  ];
+  var random = sketches[Math.floor(Math.random() * sketches.length)];
+  window.location.replace('/work/generative/' + random);
+</script>
