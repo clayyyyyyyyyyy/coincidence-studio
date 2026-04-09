@@ -55,7 +55,7 @@ const items = [
   /* Planets 2–5: stacked behind planet 1 when closed */
   .badge-item:nth-child(n+2) {
     opacity: 0;
-    transform: translateY(calc(-1 * var(--i) * (32px + 10px)));
+    transform: translateY(calc(-1 * var(--i) * (24px + 10px)));
     pointer-events: none;
     transition:
       transform 0.3s cubic-bezier(0.6, 0, 0.4, 1),
@@ -76,8 +76,8 @@ const items = [
 
   /* Badge circle — planet container */
   .badge-circle {
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     background: transparent;
     border: none;
@@ -184,7 +184,7 @@ const items = [
   import * as THREE from 'three';
 
   // --- Three.js Planet Rendering ---
-  const PLANET_SIZE = 32;
+  const PLANET_SIZE = 24;
 
   const planetConfigs = [
     { name: 'sun', texture: '/textures/sun.jpg', emissive: true, speed: 0.003 },
