@@ -66,9 +66,6 @@ const categories = [
   </div>
 </Base>
 
-<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.11.1/p5.min.js"></script>
-<script is:inline src="/sketches/clouds.js"></script>
-
 <script is:inline>
 (function() {
   var sketches = [
@@ -96,8 +93,6 @@ const categories = [
     viewerIframe.src = basePath + sketches[currentIndex] + '.html';
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
-    // Pause cloud shader to free GPU for the sketch
-    if (window.pauseClouds) window.pauseClouds();
   }
 
   function closeViewer() {
@@ -108,8 +103,6 @@ const categories = [
       }
     }, 400);
     document.body.style.overflow = '';
-    // Resume cloud shader
-    if (window.resumeClouds) window.resumeClouds();
   }
 
   // Expose closeViewer so the Nav badge "1" can close the viewer
@@ -164,28 +157,12 @@ const categories = [
 <style>
   :global(body.fullbleed) {
     --hero-text: #1A1A1A;
-    --hero-shadow: 0 0 0 transparent;
     overflow: hidden;
-    background: transparent;
-    transition: color 0.8s ease;
-  }
-
-  :global(body.fullbleed.night-mode) {
-    --hero-text: #fff;
-    --hero-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
-  }
-
-  :global(body.fullbleed canvas.p5Canvas) {
-    position: fixed !important;
-    top: 0;
-    left: 0;
-    width: 100vw !important;
-    height: 100vh !important;
-    z-index: 0;
+    background: #fff;
   }
 
   :global(body.fullbleed main) {
-    background: transparent;
+    background: #fff;
     padding: 0;
   }
 
